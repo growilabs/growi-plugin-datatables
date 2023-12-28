@@ -30,7 +30,8 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
-    const enableDataTable = async() => {
+    const enableDataTable = async(event: React.MouseEvent<HTMLElement>) => {
+      (event.target as any).hidden = true;
       const api = new DataTable(`#${id} table`, dataTableOptions);
 
       api.on('order.dt', () => {
@@ -42,14 +43,15 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
 
         (api.order as any).neutral().draw();
       })
-
-      isDataTableEnabled = true;
     };
 
     return (
       <div id={id}>
-        { !isDataTableEnabled &&
-          <button onClick={enableDataTable}>Enable</button> }
+        <button
+          onClick={enableDataTable}
+          disabled={isDataTableEnabled}
+          className='btn btn-sm btn-outline-secondary'
+        >Enable DataTable</button>
         <Table {...props}>
           {children}
         </Table>
