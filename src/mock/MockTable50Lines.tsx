@@ -270,7 +270,7 @@ const tableHTML =
 
 const DataTables = wrapDataTable(() => tableHTML);
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById('MockTable50Lines') as HTMLElement).render(
   <React.StrictMode>
     <DataTables/>
   </React.StrictMode>,

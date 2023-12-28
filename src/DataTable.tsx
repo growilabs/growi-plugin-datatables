@@ -34,11 +34,13 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       const api = new DataTable(`#${id} table`, dataTableOptions);
 
       api.on('order.dt', () => {
-        const order = api.order() as any;
+        const order = api.order();
+        if (order.length <= 0) return;
+
         const orderSequenceWillBe = order[0][1];
-        if (orderSequenceWillBe == 'pre') {
-          order.neutral().draw();
-        }
+        if (orderSequenceWillBe != 'pre') return;
+
+        (api.order as any).neutral().draw();
       })
 
       isDataTableEnabled = true;
