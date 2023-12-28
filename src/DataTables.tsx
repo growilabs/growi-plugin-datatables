@@ -9,6 +9,7 @@ export const wrapDatatables = (Table: React.FunctionComponent<any>): React.Funct
 
     const id = uuidv4();
     const dataTableOptions = {
+      dom: 'ft<"mb-3"ilp>',
       paging: false,
       scrollCollapse: true,
       scrollY: '500px'
