@@ -20,7 +20,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
      * - テーブルを縦スクロール化(縦幅は 500px)
      */
     const dataTableOptions = {
-      dom: '<"mb-3"ftilp>',
+      dom: '<"mb-3"<"text-left"f>t<"text-muted"i>lp>',
       columnDefs: [
         { type: 'natural', orderSequence: [ 'asc', 'desc', 'pre' ], targets: '_all' }
       ],
@@ -46,11 +46,12 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
     };
 
     return (
-      <div id={id}>
+      <div id={id} className='position-relative'>
         <button
           onClick={enableDataTable}
           disabled={isDataTableEnabled}
-          className='btn btn-sm btn-outline-secondary'
+          className='btn btn-sm btn-outline-secondary position-absolute'
+          style={{ top: '11px', right: '100px'}}
         >Enable DataTable</button>
         <Table {...props}>
           {children}
