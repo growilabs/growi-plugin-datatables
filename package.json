@@ -23,13 +23,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "datatables.net-bs4": "^1.13.8",
+    "datatables.net-plugins": "^1.13.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-innertext": "^1.1.5"
+    "react-innertext": "^1.1.5",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
+    "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vitejs/plugin-react": "^2.1.0",
