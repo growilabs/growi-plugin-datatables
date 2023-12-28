@@ -7,10 +7,9 @@ import './DataTable.css';
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
-    // [TODO] Enable ボタンは DataTable 適用後に非表示にする
-    let isDataTableEnabled = false;
-
-    const id = uuidv4();
+    const containerId = uuidv4();
+    const dtSelector = `#${containerId} table`;
+    const buttonId = uuidv4();
     /*
      * DataTable の設定
      * - DataTable 全体を div で括って class "mb-3" を付与
@@ -30,9 +29,9 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
-    const enableDataTable = async(event: React.MouseEvent<HTMLElement>) => {
-      (event.target as any).hidden = true;
-      const api = new DataTable(`#${id} table`, dataTableOptions);
+    const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
+      hideElement(event.target as HTMLElement);
+      const api = new DataTable(dtSelector, dataTableOptions);
 
       api.on('order.dt', () => {
         const order = api.order();
@@ -45,12 +44,32 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       })
     };
 
+    const displayEnablingDataTableButton = () => {
+      const element = document.getElementById(buttonId);
+      if (element == null) return;
+      if (DataTable.isDataTable(dtSelector)) return;
+
+      displayElement(element);
+    }
+
+    const hideEnablingDataTableButton = () => {
+      const element = document.getElementById(buttonId);
+      if (element == null) return;
+
+      hideElement(element);
+    }
+
     return (
-      <div id={id} className='position-relative'>
+      <div
+        id={containerId}
+        className='position-relative'
+        onMouseOver={displayEnablingDataTableButton}
+        onMouseOut={hideEnablingDataTableButton}
+    >
         <button
+          id={buttonId}
           onClick={enableDataTable}
-          disabled={isDataTableEnabled}
-          className='btn btn-sm btn-outline-secondary position-absolute'
+          className='btn btn-sm btn-outline-secondary position-absolute d-none'
           style={{ top: '11px', right: '100px'}}
         >Enable DataTable</button>
         <Table {...props}>
@@ -58,5 +77,13 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         </Table>
       </div>
     );
+
+    function displayElement(target: HTMLElement) {
+      target.classList.remove('d-none');
+    };
+
+    function hideElement(target: HTMLElement) {
+      target.classList.add('d-none');
+    };
   };
 };
