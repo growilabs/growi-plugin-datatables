@@ -22,6 +22,13 @@
 
 	"customizations": {
 		"vscode": {
+			"extensions": [
+				"editorconfig.editorconfig",
+        // useful for Git and Github
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "github.vscode-pull-request-github"
+			],
 			"settings": {
 				"files.encoding": "utf8",
 				"files.eol": "\n",
