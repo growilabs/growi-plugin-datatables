@@ -9,6 +9,8 @@ const activate = (): void => {
 
   const { optionsGenerators } = growiFacade.markdownRenderer;
 
+  const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
+
   optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
     const options = optionsGenerators.generateViewOptions(...args);
     const Table = options.components.table;
@@ -16,7 +18,10 @@ const activate = (): void => {
     // replace
     options.components.table = wrapDataTable(Table);
 
-    return options;
+    return {
+      ...originalCustomViewOptions(),
+      ...options
+    };
   };
 };
 
