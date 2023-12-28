@@ -15,31 +15,6 @@ const tableHTML =
   </thead>
   <tbody>
     <tr>
-      <td>a1</td>
-      <td>b1</td>
-      <td>c1</td>
-    </tr>
-    <tr>
-      <td>a2</td>
-      <td>b2</td>
-      <td>c2</td>
-    </tr>
-    <tr>
-      <td>a3</td>
-      <td>b3</td>
-      <td>c3</td>
-    </tr>
-    <tr>
-      <td>a4</td>
-      <td>b4</td>
-      <td>c4</td>
-    </tr>
-    <tr>
-      <td>a5</td>
-      <td>b5</td>
-      <td>c5</td>
-    </tr>
-    <tr>
       <td>a6</td>
       <td>b6</td>
       <td>c6</td>
@@ -63,6 +38,31 @@ const tableHTML =
       <td>a10</td>
       <td>b10</td>
       <td>c10</td>
+    </tr>
+    <tr>
+      <td>a1</td>
+      <td>b1</td>
+      <td>c1</td>
+    </tr>
+    <tr>
+      <td>a2</td>
+      <td>b2</td>
+      <td>c2</td>
+    </tr>
+    <tr>
+      <td>a3</td>
+      <td>b3</td>
+      <td>c3</td>
+    </tr>
+    <tr>
+      <td>a4</td>
+      <td>b4</td>
+      <td>c4</td>
+    </tr>
+    <tr>
+      <td>a5</td>
+      <td>b5</td>
+      <td>c5</td>
     </tr>
     <tr>
       <td>a11</td>
