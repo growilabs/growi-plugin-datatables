@@ -2,14 +2,11 @@ import DataTable from 'datatables.net-bs4';
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
 import { v4 as uuidv4 } from 'uuid';
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import './DataTable.css';
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
-    // [TODO] Enable ボタンは DataTable 適用後に非表示にする
-    let isDataTableEnabled = false;
-
     const id = uuidv4();
     /*
      * DataTable の設定
@@ -30,9 +27,11 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
-    const enableDataTable = async() => {
-      const api = new DataTable(`#${id} table`, dataTableOptions);
+    useEffect(() => {
+      const selector = `#${id} table`;
+      if (DataTable.isDataTable(selector)) return;
 
+      const api = new DataTable(selector, dataTableOptions);
       api.on('order.dt', () => {
         const order = api.order();
         if (order.length <= 0) return;
@@ -42,14 +41,10 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
 
         (api.order as any).neutral().draw();
       })
-
-      isDataTableEnabled = true;
-    };
+    }, []);
 
     return (
       <div id={id}>
-        { !isDataTableEnabled &&
-          <button onClick={enableDataTable}>Enable</button> }
         <Table {...props}>
           {children}
         </Table>
