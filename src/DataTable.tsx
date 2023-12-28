@@ -69,7 +69,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         <button
           id={buttonId}
           onClick={enableDataTable}
-          className='btn btn-sm btn-outline-secondary d-none gpdt-enabling-datatable'
+          className='btn btn-sm btn-secondary d-none gpdt-enabling-datatable'
         >Enable DataTable</button>
         <Table {...props}>
           {children}
