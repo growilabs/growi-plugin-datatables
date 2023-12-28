@@ -1,18 +1,28 @@
-import DataTables from 'datatables.net';
+import DataTables from 'datatables.net-bs4';
 import { v4 as uuidv4 } from 'uuid';
-import React, { useEffect } from "react";
+import React from "react";
+import './DataTables.css';
 
 export const wrapDatatables = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
+    let isDataTablesEnabled = false;
+
     const id = uuidv4();
+    const dataTableOptions = {
+      paging: false,
+      scrollCollapse: true,
+      scrollY: '500px'
+    };
 
     const clickHandler = async() => {
-      new DataTables(`#${id} table`);
+      new DataTables(`#${id} table`, dataTableOptions);
+      isDataTablesEnabled = true;
     };
 
     return (
       <div id={id}>
-        <button onClick={clickHandler}>Enable</button>
+        { !isDataTablesEnabled &&
+          <button onClick={clickHandler}>Enable</button> }
         <Table {...props}>
           {children}
         </Table>

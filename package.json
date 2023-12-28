@@ -23,7 +23,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "datatables.net": "^1.13.8",
+    "datatables.net-bs4": "^1.13.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-innertext": "^1.1.5",
