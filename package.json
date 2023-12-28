@@ -1,0 +1,54 @@
+{
+  "name": "growi-plugin-datatables",
+  "version": "1.0.0",
+  "description": "GROWI plugin that adapts datatables to tables on a page.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryu-sato/growi-plugin-datatables.git"
+  },
+  "keywords": [
+    "growi",
+    "growi-plugin"
+  ],
+  "author": "ryu@weseek.co.jp",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ryu-sato/growi-plugin-datatables/issues"
+  },
+  "homepage": "https://github.com/ryu-sato/growi-plugin-datatables#readme",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-innertext": "^1.1.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.17",
+    "@types/react-dom": "^18.0.6",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@vitejs/plugin-react": "^2.1.0",
+    "eslint": "^8.18.0",
+    "eslint-config-next": "^12.1.6",
+    "eslint-config-weseek": "^2.1.0",
+    "eslint-import-resolver-typescript": "^3.2.5",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^27.1.0",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-regex": "^1.10.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.1.0"
+  },
+  "growiPlugin": {
+    "schemaVersion": "4",
+    "types": [
+      "script"
+    ]
+  }
+}

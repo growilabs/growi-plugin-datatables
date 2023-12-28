@@ -1,0 +1,55 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+	"name": "Node.js & TypeScript",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bookworm",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "yarn install",
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"files.encoding": "utf8",
+				"files.eol": "\n",
+				"files.insertFinalNewline": true,
+				"files.trimTrailingWhitespace": true,
+
+				"eslint.workingDirectories": [{ "mode": "auto" }],
+
+				// use vscode-stylelint
+				// see https://github.com/stylelint/vscode-stylelint
+				"stylelint.validate": ["css", "less", "scss"],
+				"stylelint.ignoreDisables": true,
+				"css.validate": false,
+				"less.validate": false,
+				"scss.validate": false,
+
+				"editor.tabSize": 2,
+				"editor.indentSize": "tabSize",
+				"editor.codeActionsOnSave": {
+					"source.fixAll.eslint": true,
+					"source.fixAll.markdownlint": true,
+					"source.fixAll.stylelint": true
+				},
+				"[markdown]": {
+					"files.insertFinalNewline": false,
+					"files.trimTrailingWhitespace": false
+				}
+			}
+		}
+	}
+}
