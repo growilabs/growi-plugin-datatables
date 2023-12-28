@@ -1,4 +1,4 @@
-import { wrapDatatables } from './src/DataTables';
+import { wrapDataTable } from './src/DataTable';
 
 declare const growiFacade: any;
 
@@ -14,7 +14,7 @@ const activate = (): void => {
     const Table = options.components.table;
 
     // replace
-    options.components.table = wrapDatatables(Table);
+    options.components.table = wrapDataTable(Table);
 
     return options;
   };

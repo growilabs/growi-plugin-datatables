@@ -1,19 +1,19 @@
-import DataTables from 'datatables.net-bs4';
+import DataTable from 'datatables.net-bs4';
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
 import { v4 as uuidv4 } from 'uuid';
 import React from "react";
-import './DataTables.css';
+import './DataTable.css';
 
-export const wrapDatatables = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
+export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
     // [TODO] Enable ボタンは DataTable 適用後に非表示にする
-    let isDataTablesEnabled = false;
+    let isDataTableEnabled = false;
 
     const id = uuidv4();
     /*
-     * DataTables の設定
-     * - DataTables 全体を div で括って class "mb-3" を付与
+     * DataTable の設定
+     * - DataTable 全体を div で括って class "mb-3" を付与
      * - 全カラムに "natural" ソートを有効化
      * - 全カラムのソート順序を "初期順序"(デフォルト) => "昇順" => "降順" に設定
      * - ページネーションを無効化
@@ -30,8 +30,8 @@ export const wrapDatatables = (Table: React.FunctionComponent<any>): React.Funct
       scrollY: '500px'
     };
 
-    const enableDataTables = async() => {
-      const api = new DataTables(`#${id} table`, dataTableOptions);
+    const enableDataTable = async() => {
+      const api = new DataTable(`#${id} table`, dataTableOptions);
 
       api.on('order.dt', () => {
         const order = api.order() as any;
@@ -41,13 +41,13 @@ export const wrapDatatables = (Table: React.FunctionComponent<any>): React.Funct
         }
       })
 
-      isDataTablesEnabled = true;
+      isDataTableEnabled = true;
     };
 
     return (
       <div id={id}>
-        { !isDataTablesEnabled &&
-          <button onClick={enableDataTables}>Enable</button> }
+        { !isDataTableEnabled &&
+          <button onClick={enableDataTable}>Enable</button> }
         <Table {...props}>
           {children}
         </Table>

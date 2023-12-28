@@ -2,7 +2,7 @@ import React from 'react';
 
 import ReactDOM from 'react-dom/client';
 
-import { wrapDatatables } from '../DataTables';
+import { wrapDataTable } from '../DataTable';
 
 const tableHTML =
 <table className="table table-bordered">
@@ -268,7 +268,7 @@ const tableHTML =
 </table>
 ;
 
-const DataTables = wrapDatatables(() => tableHTML);
+const DataTables = wrapDataTable(() => tableHTML);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
