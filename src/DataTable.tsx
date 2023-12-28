@@ -19,7 +19,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
      * - テーブルを縦スクロール化(縦幅は 500px)
      */
     const dataTableOptions = {
-      dom: '<"mb-3"<"text-left"f>t<"text-muted"i>lp>',
+      dom: '<"mb-3"<"container-fluid"<"row"f>>t<"text-muted"i>lp>',
       columnDefs: [
         { type: 'natural', orderSequence: [ 'asc', 'desc', 'pre' ], targets: '_all' }
       ],
