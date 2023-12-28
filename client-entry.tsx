@@ -12,16 +12,13 @@ const activate = (): void => {
   const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
 
   optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
-    const options = optionsGenerators.generateViewOptions(...args);
+    const options = originalCustomViewOptions ? originalCustomViewOptions() : optionsGenerators.generateViewOptions(...args);
     const Table = options.components.table;
 
     // replace
     options.components.table = wrapDataTable(Table);
 
-    return {
-      ...originalCustomViewOptions(),
-      ...options
-    };
+    return options;
   };
 };
 
