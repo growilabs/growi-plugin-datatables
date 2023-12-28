@@ -4,4 +4,5 @@
   position: absolute;
   top: 0.5rem;
   right: 4rem;
+  z-index: 1;
 }
