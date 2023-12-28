@@ -12,7 +12,7 @@ const activate = (): void => {
   const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
 
   optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
-    const options = originalCustomViewOptions ? originalCustomViewOptions() : optionsGenerators.generateViewOptions(...args);
+    const options = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
     const Table = options.components.table;
 
     // replace
