@@ -75,7 +75,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
       calcMethodPosition.forEach((pos) => {
         const { row, column } = pos;
-        const sum = api.column(column).data().sum();
+        const sum = (api.column(column).data() as any).sum();
         api.cell({ row, column }).data(sum); 
       })
     };
