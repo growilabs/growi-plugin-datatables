@@ -45,7 +45,6 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
     const findCalcMethodPosition = (api: DataTableApi<any>, method: CalcMethod): Array<{row: number, column: number}> => {
       const pos = []
       const data = api.data().toArray();
-      console.log('data', data);
       for (let row = 0; row < data.length; row++) {
         for (let column = 0; column < data[row].length; column++) {
           const value = data[row][column].trim();
@@ -72,15 +71,12 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         (api.order as any).neutral().draw();
       })
 
-      api.on('draw.dt', () => {
-        // replace '{sum}' to actual value
-        const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
-        console.log('calcMethodPosition', calcMethodPosition);
-        calcMethodPosition.forEach((pos) => {
-          const { row, column } = pos;
-          const sum = (api.column(column).data() as any).sum();
-          api.cell({ row, column }).data(sum); 
-        })
+      // replace '{sum}' to actual value
+      const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
+      calcMethodPosition.forEach((pos) => {
+        const { row, column } = pos;
+        const sum = (api.column(column).data() as any).sum();
+        api.cell({ row, column }).data(sum); 
       })
     };
 
@@ -110,7 +106,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
           id={buttonId}
           onClick={enableDataTable}
           className='btn btn-sm btn-secondary d-none gpdt-enabling-datatable'
-        >Enable DataTable hoge</button>
+        >Enable DataTable</button>
         <Table {...props}>
           {children}
         </Table>
