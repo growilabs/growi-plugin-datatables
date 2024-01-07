@@ -9,7 +9,14 @@ import 'datatables.net-plugins/sorting/natural.mjs';
 import 'datatables.net-plugins/api/sum().mjs';
 
 import './DataTable.css';
-import { CalcMethod } from './types';
+
+// interfaces **********************************************************************************************
+export const CalcMethod = {
+  sum: '$sum',
+} as const;
+
+export type CalcMethod = typeof CalcMethod[keyof typeof CalcMethod];
+// *********************************************************************************************************
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -65,8 +72,8 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       })
 
       // replace '$sum' to actual value
-      const targetValuePosition = findCalcMethodPosition(api, CalcMethod.sum);
-      targetValuePosition.forEach((pos) => {
+      const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
+      calcMethodPosition.forEach((pos) => {
         const { row, column } = pos;
         const sum = api.column(column).data().sum();
         api.cell({ row, column }).data(sum); 
