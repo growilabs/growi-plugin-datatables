@@ -10,13 +10,23 @@ import 'datatables.net-plugins/api/sum().mjs';
 
 import './DataTable.css';
 
-// interfaces **********************************************************************************************
-const CalcMethod = {
-  sum: '{sum}'
-} as const;
 
-type CalcMethod = typeof CalcMethod[keyof typeof CalcMethod];
-// *********************************************************************************************************
+const CalcMethod = [
+  {
+    methodType: '{sum}',
+    calcMethod: (api: DataTableApi<any>, column: number): number => {
+      return (api.column(column).data() as any).sum();
+    },
+  },
+] as const;
+
+const MethodTypes = Object.values(CalcMethod).map(item => item.methodType);
+
+type MethodType = typeof CalcMethod[number]['methodType'];
+
+const getCalcMethod = (methodType: MethodType) => {
+  return CalcMethod.find(v => v.methodType == methodType)?.calcMethod;
+}
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -42,34 +52,26 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
-    const getEveryCalcMethodData = (api: DataTableApi<any>, calcMethodArr: CalcMethod[]): Array<{row: number, column: number, calcMethod: CalcMethod}> => {
-      const calcMethodData = []
+    const getReplaceCellPositions = (api: DataTableApi<any>): Array<{row: number, column: number, methodType: MethodType}> => {
+      const replaceCellPositions = []
       const data = api.data().toArray();
       for (let row = 0; row < data.length; row++) {
         for (let column = 0; column < data[row].length; column++) {
           const value = data[row][column].trim();
-          if (calcMethodArr.includes(value)) {
-            calcMethodData.push({ row, column, calcMethod: value });
+          if (MethodTypes.includes(value)) {
+            replaceCellPositions.push({ row, column, methodType: value });  
           }
         }
       }
 
-      return calcMethodData;
+      return replaceCellPositions;
     }
 
-    const calc = (api: DataTableApi<any>): Array<{row: number, column: number, calcResult: number}> => {
-      const calcMethodData = getEveryCalcMethodData(api, [CalcMethod.sum]);
-      const calculatedData: Array<{row: number, column: number, calcResult: number}> = [];
-
-      calcMethodData.forEach(({ row, column, calcMethod }) => {
-        let calcResult;
-        switch(calcMethod) {
-          case CalcMethod.sum:
-            calcResult = (api.column(column).data() as any).sum();
-            break;
-          default:
-            return;
-        }
+    const handleCalcMethod = (api: DataTableApi<any>): Array<{row: number, column: number, calcResult?: number}> => {
+      const calcData = getReplaceCellPositions(api);
+      const calculatedData: Array<{row: number, column: number, calcResult?: number}> = [];
+      calcData.forEach(({ row, column, methodType }) => {
+        const calcResult = getCalcMethod(methodType)?.(api, column);
         calculatedData.push({ row, column, calcResult });
       })
 
@@ -91,7 +93,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       })
 
       // 計算処理と計算結果の置き換え処理は分ける (置き換えられる計算結果を考慮しない)
-      const calculatedData = calc(api);
+      const calculatedData = handleCalcMethod(api);
       calculatedData.forEach(({ row, column, calcResult }) => {
         api.cell({ row, column }).data(calcResult); 
       })
