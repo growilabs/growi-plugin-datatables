@@ -1,12 +1,15 @@
+import React from "react";
+
+import { v4 as uuidv4 } from 'uuid';
+
 import DataTable, { type Api as DataTableApi } from 'datatables.net-bs4';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
 import 'datatables.net-plugins/api/sum().mjs';
 
-import { v4 as uuidv4 } from 'uuid';
-import React from "react";
 import './DataTable.css';
+import { CalcMethod } from './types';
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -32,13 +35,13 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
-    const findTargerValuePosition = (api: DataTableApi<any>, targetValue: string): Array<{row: number, column: number}> => {
+    const findCalcMethodPosition = (api: DataTableApi<any>, method: CalcMethod): Array<{row: number, column: number}> => {
       const pos = []
       const data = api.data().toArray();
       for (let row = 0; row < data.length; row++) {
         for (let column = 0; column < data[row].length; column++) {
           const value = data[row][column];
-          if (value === '$sum') {
+          if (value === method) {
             pos.push({ row, column });
           }
         }
@@ -62,7 +65,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       })
 
       // replace '$sum' to actual value
-      const targetValuePosition = findTargerValuePosition(api, '$sum');
+      const targetValuePosition = findCalcMethodPosition(api, CalcMethod.sum);
       targetValuePosition.forEach((pos) => {
         const { row, column } = pos;
         const sum = api.column(column).data().sum();
