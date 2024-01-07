@@ -42,7 +42,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
-    const getCalcMethodData = (api: DataTableApi<any>, calcMethodArr: CalcMethod[]): Array<{row: number, column: number, calcMethod: CalcMethod}> => {
+    const getEveryCalcMethodData = (api: DataTableApi<any>, calcMethodArr: CalcMethod[]): Array<{row: number, column: number, calcMethod: CalcMethod}> => {
       const calcMethodData = []
       const data = api.data().toArray();
       for (let row = 0; row < data.length; row++) {
@@ -58,19 +58,19 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
     }
 
     const calc = (api: DataTableApi<any>) => {
-      const calcMethodData = getCalcMethodData(api, [CalcMethod.sum]);
+      const calcMethodData = getEveryCalcMethodData(api, [CalcMethod.sum]);
       const calculatedData: Array<{row: number, column: number, calcResult: number}> = [];
 
       calcMethodData.forEach(({ row, column, calcMethod }) => {
-        let result;
+        let calcResult;
         switch(calcMethod) {
           case CalcMethod.sum:
-            result = (api.column(column).data() as any).sum();
+            calcResult = (api.column(column).data() as any).sum();
             break;
           default:
             return;
         }
-        calculatedData.push({ row, column, calcResult: result });
+        calculatedData.push({ row, column, calcResult });
       })
 
       return calculatedData;
