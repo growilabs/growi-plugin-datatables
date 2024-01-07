@@ -18,6 +18,14 @@ const CalcMethod = [
       return (api.column(column).data() as any).sum();
     },
   },
+  {
+    methodType: '{avg}',
+    calcMethod: (api: DataTableApi<any>, column: number): number => {
+      const sum = (api.column(column).data() as any).sum();
+      const columnLength = api.column(column).data().length;
+      return sum / columnLength;
+    },
+  },
 ] as const;
 
 const MethodTypes = Object.values(CalcMethod).map(item => item.methodType);
