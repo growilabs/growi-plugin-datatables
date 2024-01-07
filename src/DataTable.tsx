@@ -47,7 +47,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       const data = api.data().toArray();
       for (let row = 0; row < data.length; row++) {
         for (let column = 0; column < data[row].length; column++) {
-          const value = data[row][column];
+          const value = data[row][column].trim();
           if (value === method) {
             pos.push({ row, column });
           }
@@ -71,12 +71,14 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         (api.order as any).neutral().draw();
       })
 
-      // replace '$sum' to actual value
-      const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
-      calcMethodPosition.forEach((pos) => {
-        const { row, column } = pos;
-        const sum = (api.column(column).data() as any).sum();
-        api.cell({ row, column }).data(sum); 
+      api.on('draw.dt', () => {
+        // replace '{sum}' to actual value
+        const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
+        calcMethodPosition.forEach((pos) => {
+          const { row, column } = pos;
+          const sum = (api.column(column).data() as any).sum();
+          api.cell({ row, column }).data(sum); 
+        })
       })
     };
 
