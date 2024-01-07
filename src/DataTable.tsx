@@ -57,7 +57,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       return calcMethodData;
     }
 
-    const calc = (api: DataTableApi<any>) => {
+    const calc = (api: DataTableApi<any>): Array<{row: number, column: number, calcResult: number}> => {
       const calcMethodData = getEveryCalcMethodData(api, [CalcMethod.sum]);
       const calculatedData: Array<{row: number, column: number, calcResult: number}> = [];
 
