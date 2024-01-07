@@ -12,7 +12,7 @@ import './DataTable.css';
 
 // interfaces **********************************************************************************************
 export const CalcMethod = {
-  sum: '$sum',
+  sum: '{sum}',
 } as const;
 
 export type CalcMethod = typeof CalcMethod[keyof typeof CalcMethod];
