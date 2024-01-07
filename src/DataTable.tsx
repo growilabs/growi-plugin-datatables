@@ -71,7 +71,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         (api.order as any).neutral().draw();
       })
 
-      // replace '{sum}' to actual value
+      // テーブル中に存在する {sum} をそのカラムの合計値に置き換える
       const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
       calcMethodPosition.forEach((pos) => {
         const { row, column } = pos;
