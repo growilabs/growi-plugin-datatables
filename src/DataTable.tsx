@@ -90,9 +90,8 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         (api.order as any).neutral().draw();
       })
 
-      const calculatedData = calc(api);
-
       // 計算処理と計算結果の置き換え処理は分ける (置き換えられる計算結果を考慮しない)
+      const calculatedData = calc(api);
       calculatedData.forEach(({ row, column, calcResult }) => {
         api.cell({ row, column }).data(calcResult); 
       })
