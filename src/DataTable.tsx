@@ -11,11 +11,11 @@ import 'datatables.net-plugins/api/sum().mjs';
 import './DataTable.css';
 
 // interfaces **********************************************************************************************
-export const CalcMethod = {
-  sum: '{sum}',
+const CalcMethod = {
+  sum: '{sum}'
 } as const;
 
-export type CalcMethod = typeof CalcMethod[keyof typeof CalcMethod];
+type CalcMethod = typeof CalcMethod[keyof typeof CalcMethod];
 // *********************************************************************************************************
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
@@ -42,19 +42,38 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
-    const findCalcMethodPosition = (api: DataTableApi<any>, method: CalcMethod): Array<{row: number, column: number}> => {
-      const pos = []
+    const getCalcMethodData = (api: DataTableApi<any>, calcMethodArr: CalcMethod[]): Array<{row: number, column: number, calcMethod: CalcMethod}> => {
+      const calcMethodData = []
       const data = api.data().toArray();
       for (let row = 0; row < data.length; row++) {
         for (let column = 0; column < data[row].length; column++) {
           const value = data[row][column].trim();
-          if (value === method) {
-            pos.push({ row, column });
+          if (calcMethodArr.includes(value)) {
+            calcMethodData.push({ row, column, calcMethod: value });
           }
         }
       }
 
-      return pos;
+      return calcMethodData;
+    }
+
+    const calc = (api: DataTableApi<any>) => {
+      const calcMethodData = getCalcMethodData(api, [CalcMethod.sum]);
+      const calculatedData: Array<{row: number, column: number, calcResult: number}> = [];
+
+      calcMethodData.forEach(({ row, column, calcMethod }) => {
+        let result;
+        switch(calcMethod) {
+          case CalcMethod.sum:
+            result = (api.column(column).data() as any).sum();
+            break;
+          default:
+            return;
+        }
+        calculatedData.push({ row, column, calcResult: result });
+      })
+
+      return calculatedData;
     }
 
     const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
@@ -71,12 +90,11 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         (api.order as any).neutral().draw();
       })
 
-      // テーブル中に存在する {sum} をそのカラムの合計値に置き換える
-      const calcMethodPosition = findCalcMethodPosition(api, CalcMethod.sum);
-      calcMethodPosition.forEach((pos) => {
-        const { row, column } = pos;
-        const sum = (api.column(column).data() as any).sum();
-        api.cell({ row, column }).data(sum); 
+      const calculatedData = calc(api);
+
+      // 計算処理と計算結果の置き換え処理は分ける (置き換えられる計算結果を考慮しない)
+      calculatedData.forEach(({ row, column, calcResult }) => {
+        api.cell({ row, column }).data(calcResult); 
       })
     };
 
