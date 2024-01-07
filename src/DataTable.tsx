@@ -1,6 +1,9 @@
-import DataTable from 'datatables.net-bs4';
+import DataTable, { type Api as DataTableApi } from 'datatables.net-bs4';
+
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
+import 'datatables.net-plugins/api/sum().mjs';
+
 import { v4 as uuidv4 } from 'uuid';
 import React from "react";
 import './DataTable.css';
@@ -29,6 +32,21 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
+    const findTargerValuePosition = (api: DataTableApi<any>, targetValue: string): Array<{row: number, column: number}> => {
+      const pos = []
+      const data = api.data().toArray();
+      for (let row = 0; row < data.length; row++) {
+        for (let column = 0; column < data[row].length; column++) {
+          const value = data[row][column];
+          if (value === '$sum') {
+            pos.push({ row, column });
+          }
+        }
+      }
+
+      return pos;
+    }
+
     const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
       hideElement(event.target as HTMLElement);
       const api = new DataTable(dtSelector, dataTableOptions);
@@ -41,6 +59,14 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         if (orderSequenceWillBe != 'pre') return;
 
         (api.order as any).neutral().draw();
+      })
+
+      // replace '$sum' to actual value
+      const targetValuePosition = findTargerValuePosition(api, '$sum');
+      targetValuePosition.forEach((pos) => {
+        const { row, column } = pos;
+        const sum = api.column(column).data().sum();
+        api.cell({ row, column }).data(sum); 
       })
     };
 
