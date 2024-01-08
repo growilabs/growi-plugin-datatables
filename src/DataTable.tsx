@@ -22,7 +22,7 @@ const CalcMethod = [
     methodType: '{vavg}',
     calcMethod: (api: DataTableApi<any>, column: number): number => {
       const sum = (api.column(column).data() as any).sum();
-      const columnLength = api.column(column).data().length;
+      const columnLength = api.column(column).data().length - 1; // 置き換え対象の call 分を引く
       return sum / columnLength;
     },
   },
