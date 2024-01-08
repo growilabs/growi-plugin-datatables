@@ -6,7 +6,6 @@ import DataTable, { type Api as DataTableApi } from 'datatables.net-bs4';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
-import 'datatables.net-plugins/api/sum().mjs';
 
 import './DataTable.css';
 import {type MethodType, MethodTypes, getCalcMethod } from './CalcMethod';
