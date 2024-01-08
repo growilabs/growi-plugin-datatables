@@ -11,21 +11,40 @@ import 'datatables.net-plugins/api/sum().mjs';
 import './DataTable.css';
 
 
+type Position = { row: number, column: number };
+
 const CalcMethod = [
   {
     methodType: '{vsum}',
-    calcMethod: (api: DataTableApi<any>, column: number): number => {
-      return (api.column(column).data() as any).sum();
+    calcMethod: (api: DataTableApi<any>, pos: Position): number => {
+      return (api.column(pos.column).data() as any).sum();
     },
   },
   {
-    methodType: '{vavg}',
-    calcMethod: (api: DataTableApi<any>, column: number): number => {
-      const sum = (api.column(column).data() as any).sum();
-      const columnLength = api.column(column).data().length - 1; // 置き換え対象の call 分を引く
-      return sum / columnLength;
+    methodType: '{hsum}',
+    calcMethod: (api: DataTableApi<any>, pos: Position): number => {
+      return (api.rows(pos.row).data() as any).sum();
     },
   },
+  {
+    
+  methodType: '{vavg}',
+  calcMethod: (api: DataTableApi<any>, pos: Position): number => {
+    const sum = (api.column(pos.column).data() as any).sum();
+     // 置き換え対象の call 分を引く 
+     // 対象カラムから計算可能なセルを数えるのがベストである
+    const columnLength = api.column(pos.column).data().length - 1;
+    return sum / columnLength;
+  },
+},
+{
+  methodType: '{havg}',
+  calcMethod: (api: DataTableApi<any>, pos: Position): number => {
+    const sum =  (api.rows(pos.row).data() as any).sum();
+    const rowLength = api.rows(pos.row).data().length - 1;
+    return sum / rowLength;
+  },
+},
 ] as const;
 
 const MethodTypes = Object.values(CalcMethod).map(item => item.methodType);
@@ -79,13 +98,12 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       const calcData = getReplaceCellPositions(api);
       const calculatedData: Array<{row: number, column: number, calcResult?: number}> = [];
       calcData.forEach(({ row, column, methodType }) => {
-        const calcResult = getCalcMethod(methodType)?.(api, column);
+        const calcResult = getCalcMethod(methodType)?.(api, { row, column });
         calculatedData.push({ row, column, calcResult });
       })
 
       return calculatedData;
     }
-
     const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
       hideElement(event.target as HTMLElement);
       const api = new DataTable(dtSelector, dataTableOptions);
