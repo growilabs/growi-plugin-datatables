@@ -13,13 +13,13 @@ import './DataTable.css';
 
 const CalcMethod = [
   {
-    methodType: '{sum}',
+    methodType: '{vsum}',
     calcMethod: (api: DataTableApi<any>, column: number): number => {
       return (api.column(column).data() as any).sum();
     },
   },
   {
-    methodType: '{avg}',
+    methodType: '{vavg}',
     calcMethod: (api: DataTableApi<any>, column: number): number => {
       const sum = (api.column(column).data() as any).sum();
       const columnLength = api.column(column).data().length;
