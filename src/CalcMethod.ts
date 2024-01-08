@@ -19,23 +19,20 @@ type CalcMethod = {
   methodType: MethodType, 
   calcMethod: (api: DataTableApi<any>, pos: { row: number, column: number }) => number
 }
-/*
-* -------------------------------------------------------------------------------------------------------
-*/
 
 
 /*
 * Functions
 * -------------------------------------------------------------------------------------------------------
 */
-const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
+const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
 
-const avg = (arr: number[]) => sum(arr) / arr.length;
+const avg = (arr: number[]): number => sum(arr) / arr.length;
 
-// 計算可能な値のみを取り出す
+// 対象 column, row から計算可能な数値配列を返却
 // ✅ values = ["1", 12, 23.5, "24g"]
 // ❌ values = ["abc", null]
-const getCalculableValues = (values: any[]) => {
+const getCalculableValues = (values: any[]): number[] => {
   const calculableValues: number[] = [];
 
   values.forEach(v => {
@@ -76,7 +73,7 @@ const CalcMethod: CalcMethod[] = [
   {
     methodType: MethodType.havg,
     calcMethod: (api, pos) => {
-      const targetCells = api.rows(pos.row).data().toArray();
+      const targetCells = api.row(pos.row).data();
       const calcilableValues = getCalculableValues(targetCells);
       return avg(calcilableValues);
      },
@@ -86,6 +83,3 @@ const CalcMethod: CalcMethod[] = [
 export const getCalcMethod = (methodType: MethodType) => {
   return CalcMethod.find(v => v.methodType == methodType)?.calcMethod;
 }
-/*
-* -------------------------------------------------------------------------------------------------------
-*/
