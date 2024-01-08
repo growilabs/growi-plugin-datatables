@@ -1,18 +1,19 @@
 import { type Api as DataTableApi } from 'datatables.net-bs4';
 
 const MethodType = {
-    vsum: '{vsum}',
-    hsum: '{hsum}',
-    vavg: '{vavg}',
-    havg: '{havg}',
+  vsum: '{vsum}',
+  hsum: '{hsum}',
+  vavg: '{vavg}',
+  havg: '{havg}',
 } as const;
 
 export const MethodTypes = Object.values(MethodType);
 
 export type MethodType = typeof MethodType[keyof typeof MethodType];
+
 type CalcMethod = {
-    methodType: MethodType, 
-    calcMethod: (api: DataTableApi<any>, pos: { row: number, column: number }) => number
+  methodType: MethodType, 
+  calcMethod: (api: DataTableApi<any>, pos: { row: number, column: number }) => number
 }
 
 const CalcMethod: CalcMethod[] = [
@@ -49,5 +50,5 @@ const CalcMethod: CalcMethod[] = [
 ];
 
 export const getCalcMethod = (methodType: MethodType) => {
-    return CalcMethod.find(v => v.methodType == methodType)?.calcMethod;
+  return CalcMethod.find(v => v.methodType == methodType)?.calcMethod;
 }
