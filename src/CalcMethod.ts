@@ -33,15 +33,15 @@ const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
 const avg = (arr: number[]) => sum(arr) / arr.length;
 
 // 計算可能な値のみを取り出す
-// ✅ "1", 12, 23.5
-// ❌ "1a", "abc", 
+// ✅ values = ["1", 12, 23.5, "24g"]
+// ❌ values = ["abc", null]
 const getCalculableValues = (values: any[]) => {
   const calculableValues: number[] = [];
 
   values.forEach(v => {
-    const paesedValue = parseInt(v);
-    if (!isNaN(paesedValue)) {
-      calculableValues.push(paesedValue);
+    const parsedValue = parseFloat(v);
+    if (!isNaN(parsedValue)) {
+      calculableValues.push(parsedValue);
     }
   });
 
