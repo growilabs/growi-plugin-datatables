@@ -1,9 +1,40 @@
-import DataTable from 'datatables.net-bs4';
+import React from "react";
+
+import { v4 as uuidv4 } from 'uuid';
+
+import DataTable, { type Api as DataTableApi } from 'datatables.net-bs4';
+
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
-import { v4 as uuidv4 } from 'uuid';
-import React from "react";
+import 'datatables.net-plugins/api/sum().mjs';
+
 import './DataTable.css';
+
+
+const CalcMethod = [
+  {
+    methodType: '{vsum}',
+    calcMethod: (api: DataTableApi<any>, column: number): number => {
+      return (api.column(column).data() as any).sum();
+    },
+  },
+  {
+    methodType: '{vavg}',
+    calcMethod: (api: DataTableApi<any>, column: number): number => {
+      const sum = (api.column(column).data() as any).sum();
+      const columnLength = api.column(column).data().length;
+      return sum / columnLength;
+    },
+  },
+] as const;
+
+const MethodTypes = Object.values(CalcMethod).map(item => item.methodType);
+
+type MethodType = typeof CalcMethod[number]['methodType'];
+
+const getCalcMethod = (methodType: MethodType) => {
+  return CalcMethod.find(v => v.methodType == methodType)?.calcMethod;
+}
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -29,6 +60,32 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       scrollY: '500px'
     };
 
+    const getReplaceCellPositions = (api: DataTableApi<any>): Array<{row: number, column: number, methodType: MethodType}> => {
+      const replaceCellPositions = []
+      const data = api.data().toArray();
+      for (let row = 0; row < data.length; row++) {
+        for (let column = 0; column < data[row].length; column++) {
+          const value = data[row][column].trim();
+          if (MethodTypes.includes(value)) {
+            replaceCellPositions.push({ row, column, methodType: value });  
+          }
+        }
+      }
+
+      return replaceCellPositions;
+    }
+
+    const handleCalcMethod = (api: DataTableApi<any>): Array<{row: number, column: number, calcResult?: number}> => {
+      const calcData = getReplaceCellPositions(api);
+      const calculatedData: Array<{row: number, column: number, calcResult?: number}> = [];
+      calcData.forEach(({ row, column, methodType }) => {
+        const calcResult = getCalcMethod(methodType)?.(api, column);
+        calculatedData.push({ row, column, calcResult });
+      })
+
+      return calculatedData;
+    }
+
     const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
       hideElement(event.target as HTMLElement);
       const api = new DataTable(dtSelector, dataTableOptions);
@@ -41,6 +98,12 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         if (orderSequenceWillBe != 'pre') return;
 
         (api.order as any).neutral().draw();
+      })
+
+      // 計算処理と計算結果の置き換え処理は分ける (置き換えられる計算結果を考慮しない)
+      const calculatedData = handleCalcMethod(api);
+      calculatedData.forEach(({ row, column, calcResult }) => {
+        api.cell({ row, column }).data(calcResult); 
       })
     };
 
