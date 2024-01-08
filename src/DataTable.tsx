@@ -9,7 +9,7 @@ import 'datatables.net-plugins/sorting/natural.mjs';
 import 'datatables.net-plugins/api/sum().mjs';
 
 import './DataTable.css';
-import { type MethodType, MethodTypes, getCalcMethod } from './CalcMethod';
+import {type MethodType, MethodTypes, getCalcMethod } from './CalcMethod';
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
