@@ -20,7 +20,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "yarn eslint --quiet \"src/**/*.{ts,tsx}\"",
+    "lint:format": "yarn lint --fix"
   },
   "dependencies": {
     "datatables.net-bs4": "^1.13.8",
