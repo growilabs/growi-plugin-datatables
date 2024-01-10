@@ -34,7 +34,7 @@ const convertToNumber = (value: any): undefined | number => {
     return
   }
 
-  if (typeof value === 'string' && value.trim() === '') {
+  if (value.trim() === '') {
     return
   }
 
