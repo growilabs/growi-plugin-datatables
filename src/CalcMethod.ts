@@ -29,16 +29,28 @@ const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
 
 const avg = (arr: number[]): number => sum(arr) / arr.length;
 
-// 対象 column, row から計算可能な数値配列を返却
-// ✅ values = ["1", 12, 23.5, "24g"]
-// ❌ values = ["abc", null]
+const convertToNumber = (value: any): undefined | number => {
+  if (typeof value !== 'string') {
+    return
+  }
+
+  if (typeof value === 'string' && value.trim() === '') {
+    return
+  }
+
+  const convertedValue = Number(value)
+  if (!isNaN(convertedValue)) {
+    return convertedValue;
+  } 
+}
+
 const getCalculableValues = (values: any[]): number[] => {
   const calculableValues: number[] = [];
 
   values.forEach(v => {
-    const parsedValue = parseFloat(v);
-    if (!isNaN(parsedValue)) {
-      calculableValues.push(parsedValue);
+    const convertedValue = convertToNumber(v)
+    if (convertedValue != null) {
+      calculableValues.push(convertedValue);
     }
   });
 
