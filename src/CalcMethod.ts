@@ -1,4 +1,5 @@
 import { type Api as DataTableApi } from 'datatables.net-bs4';
+import * as math from 'mathjs';
 
 /*
  * Interfaces
@@ -24,10 +25,6 @@ type CalcMethod = {
  * Functions
  * -------------------------------------------------------------------------------------------------------
  */
-const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
-
-const avg = (arr: number[]): number => sum(arr) / arr.length;
-
 const convertToNumber = (value: any): undefined | number => {
   if (typeof value !== 'string') {
     return;
@@ -53,7 +50,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.column(pos.column).data().toArray();
       const calcilableValues = getCalculableValues(targetCells);
-      return sum(calcilableValues);
+      return math.sum(calcilableValues);
     },
   },
   {
@@ -61,7 +58,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.row(pos.row).data();
       const calcilableValues = getCalculableValues(targetCells);
-      return sum(calcilableValues);
+      return math.sum(calcilableValues);
     },
   },
   {
@@ -69,7 +66,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.column(pos.column).data().toArray();
       const calcilableValues = getCalculableValues(targetCells);
-      return avg(calcilableValues);
+      return math.mean(calcilableValues);
     },
   },
   {
@@ -77,7 +74,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.row(pos.row).data();
       const calcilableValues = getCalculableValues(targetCells);
-      return avg(calcilableValues);
+      return math.mean(calcilableValues);
     },
   },
 ];
