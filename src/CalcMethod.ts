@@ -44,16 +44,7 @@ const convertToNumber = (value: any): undefined | number => {
 };
 
 const getCalculableValues = (values: any[]): number[] => {
-  const calculableValues: number[] = [];
-
-  values.forEach((v) => {
-    const convertedValue = convertToNumber(v);
-    if (convertedValue != null) {
-      calculableValues.push(convertedValue);
-    }
-  });
-
-  return calculableValues;
+  return values.map((v) => convertToNumber(v)).filter((v) => v != null) as number[];
 };
 
 const CalcMethod: CalcMethod[] = [
