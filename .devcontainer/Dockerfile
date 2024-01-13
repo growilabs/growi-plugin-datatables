@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-18
+FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-20
 
 ARG USERNAME=node
 ARG USER_UID=1000
