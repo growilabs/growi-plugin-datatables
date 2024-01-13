@@ -1,5 +1,5 @@
 import { type Api as DataTableApi } from 'datatables.net-bs4';
-import * as math from 'mathjs';
+import { sum, mean } from 'mathjs';
 
 /*
  * Interfaces
@@ -50,7 +50,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.column(pos.column).data().toArray();
       const calcilableValues = getCalculableValues(targetCells);
-      return math.sum(calcilableValues);
+      return sum(calcilableValues);
     },
   },
   {
@@ -58,7 +58,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.row(pos.row).data();
       const calcilableValues = getCalculableValues(targetCells);
-      return math.sum(calcilableValues);
+      return sum(calcilableValues);
     },
   },
   {
@@ -66,7 +66,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.column(pos.column).data().toArray();
       const calcilableValues = getCalculableValues(targetCells);
-      return math.mean(calcilableValues);
+      return mean(calcilableValues);
     },
   },
   {
@@ -74,7 +74,7 @@ const CalcMethod: CalcMethod[] = [
     calcMethod: (api, pos) => {
       const targetCells = api.row(pos.row).data();
       const calcilableValues = getCalculableValues(targetCells);
-      return math.mean(calcilableValues);
+      return mean(calcilableValues);
     },
   },
 ];
