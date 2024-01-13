@@ -37,4 +37,4 @@ jobs:
           node-version-file: 'package.json'
           cache: 'yarn'
       - run: yarn --frozen-lockfile
-      - run: yarn run build && git status
+      - run: yarn run build && git diff --exit-code
