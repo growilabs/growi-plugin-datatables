@@ -11,6 +11,7 @@ jobs:
         with:
           node-version-file: 'package.json'
           cache: 'yarn'
+      - run: yarn --frozen-lockfile
       - run: yarn run lint
 
   build:
@@ -21,6 +22,7 @@ jobs:
         with:
           node-version-file: 'package.json'
           cache: 'yarn'
+      - run: yarn --frozen-lockfile
       - run: yarn run build
 
   # Check that the build artifacts match those present in the dist dir
@@ -34,4 +36,5 @@ jobs:
         with:
           node-version-file: 'package.json'
           cache: 'yarn'
+      - run: yarn --frozen-lockfile
       - run: yarn run build && git status
