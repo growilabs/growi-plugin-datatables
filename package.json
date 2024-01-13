@@ -62,5 +62,10 @@
     "types": [
       "script"
     ]
+  },
+  "engines": {
+    "node": "20",
+    "yarn": "1.22 < 2",
+    "npm": "9"
   }
 }
