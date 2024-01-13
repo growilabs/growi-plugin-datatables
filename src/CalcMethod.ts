@@ -19,7 +19,7 @@ type CalcMethod = {
   methodType: MethodType;
   calcMethod: (api: DataTableApi<any>, pos: { row: number; column: number }) => number;
 };
-
+const test = 'test';
 /*
  * Functions
  * -------------------------------------------------------------------------------------------------------
