@@ -1,5 +1,5 @@
 import { type Api as DataTableApi } from 'datatables.net-bs4';
-import { sum, mean } from 'mathjs';
+import { sum, mean, max, min, mode, median } from 'mathjs';
 
 /*
  * Interfaces
@@ -10,6 +10,14 @@ const MethodType = {
   hsum: '{hsum}',
   vavg: '{vavg}',
   havg: '{havg}',
+  vmax: '{vmax}',
+  hmax: '{hmax}',
+  vmin: '{vmin}',
+  hmin: '{hmin}',
+  vmode: '{vmode}',
+  hmode: '{hmode}',
+  vmedian: '{vmedian}',
+  hmedian: '{hmedian}',
 } as const;
 
 export const MethodTypes = Object.values(MethodType);
@@ -75,6 +83,70 @@ const CalcMethod: CalcMethod[] = [
       const targetCells = api.row(pos.row).data();
       const calcilableValues = getCalculableValues(targetCells);
       return mean(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.vmax,
+    calcMethod: (api, pos) => {
+      const targetCells = api.column(pos.column).data().toArray();
+      const calcilableValues = getCalculableValues(targetCells);
+      return max(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.hmax,
+    calcMethod: (api, pos) => {
+      const targetCells = api.row(pos.row).data();
+      const calcilableValues = getCalculableValues(targetCells);
+      return max(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.vmin,
+    calcMethod: (api, pos) => {
+      const targetCells = api.column(pos.column).data().toArray();
+      const calcilableValues = getCalculableValues(targetCells);
+      return min(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.hmin,
+    calcMethod: (api, pos) => {
+      const targetCells = api.row(pos.row).data();
+      const calcilableValues = getCalculableValues(targetCells);
+      return min(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.vmode,
+    calcMethod: (api, pos) => {
+      const targetCells = api.column(pos.column).data().toArray();
+      const calcilableValues = getCalculableValues(targetCells);
+      return mode(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.hmode,
+    calcMethod: (api, pos) => {
+      const targetCells = api.row(pos.row).data();
+      const calcilableValues = getCalculableValues(targetCells);
+      return mode(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.vmedian,
+    calcMethod: (api, pos) => {
+      const targetCells = api.column(pos.column).data().toArray();
+      const calcilableValues = getCalculableValues(targetCells);
+      return median(calcilableValues);
+    },
+  },
+  {
+    methodType: MethodType.hmedian,
+    calcMethod: (api, pos) => {
+      const targetCells = api.row(pos.row).data();
+      const calcilableValues = getCalculableValues(targetCells);
+      return median(calcilableValues);
     },
   },
 ];
