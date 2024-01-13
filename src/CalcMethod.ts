@@ -86,7 +86,7 @@ const CalcMethod: CalcMethod[] = [
   { methodType: MethodType.hmode, calcMethod: createCalcMethod('row', mode) },
   { methodType: MethodType.vmedian, calcMethod: createCalcMethod('column', median) },
   { methodType: MethodType.hmedian, calcMethod: createCalcMethod('row', median) },
-] as const;
+];
 
 export const getCalcMethod = (methodType: MethodType): CalcMethod['calcMethod'] | undefined => {
   return CalcMethod.find((v) => v.methodType === methodType)?.calcMethod;
