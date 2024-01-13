@@ -20,6 +20,7 @@ type CalcMethod = {
   calcMethod: (api: DataTableApi<any>, pos: { row: number; column: number }) => number;
 };
 const test = 'test';
+console.log(test);
 /*
  * Functions
  * -------------------------------------------------------------------------------------------------------
