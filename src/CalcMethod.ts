@@ -65,29 +65,28 @@ const getTargetCells = (api: DataTableApi<any>, cell: Cell, pos: Pos): any => {
   }
 };
 
-const createCalcMethod = (methodType: MethodType, cell: Cell, calculator: (values: number[]) => number): CalcMethod => ({
-  methodType,
-  calcMethod: (api, pos) => {
+const createCalcMethod = (cell: Cell, calculator: (values: number[]) => number): CalcMethod['calcMethod'] => {
+  return (api: DataTableApi<any>, pos: Pos) => {
     const targetCells = getTargetCells(api, cell, pos);
     const calculableValues = convertToCalculableValues(targetCells);
     return calculator(calculableValues);
-  },
-});
+  };
+};
 
 const CalcMethod: CalcMethod[] = [
-  createCalcMethod(MethodType.vsum, 'column', sum),
-  createCalcMethod(MethodType.hsum, 'row', sum),
-  createCalcMethod(MethodType.vavg, 'column', mean),
-  createCalcMethod(MethodType.havg, 'row', mean),
-  createCalcMethod(MethodType.vmax, 'column', max),
-  createCalcMethod(MethodType.hmax, 'row', max),
-  createCalcMethod(MethodType.vmin, 'column', min),
-  createCalcMethod(MethodType.hmin, 'row', min),
-  createCalcMethod(MethodType.vmode, 'column', mode),
-  createCalcMethod(MethodType.hmode, 'row', mode),
-  createCalcMethod(MethodType.vmedian, 'column', median),
-  createCalcMethod(MethodType.hmedian, 'row', median),
-];
+  { methodType: MethodType.vsum, calcMethod: createCalcMethod('column', sum) },
+  { methodType: MethodType.hsum, calcMethod: createCalcMethod('row', sum) },
+  { methodType: MethodType.vavg, calcMethod: createCalcMethod('column', mean) },
+  { methodType: MethodType.havg, calcMethod: createCalcMethod('row', mean) },
+  { methodType: MethodType.vmax, calcMethod: createCalcMethod('column', max) },
+  { methodType: MethodType.hmax, calcMethod: createCalcMethod('row', max) },
+  { methodType: MethodType.vmin, calcMethod: createCalcMethod('column', min) },
+  { methodType: MethodType.hmin, calcMethod: createCalcMethod('row', min) },
+  { methodType: MethodType.vmode, calcMethod: createCalcMethod('column', mode) },
+  { methodType: MethodType.hmode, calcMethod: createCalcMethod('row', mode) },
+  { methodType: MethodType.vmedian, calcMethod: createCalcMethod('column', median) },
+  { methodType: MethodType.hmedian, calcMethod: createCalcMethod('row', median) },
+] as const;
 
 export const getCalcMethod = (methodType: MethodType): CalcMethod['calcMethod'] | undefined => {
   return CalcMethod.find((v) => v.methodType === methodType)?.calcMethod;
