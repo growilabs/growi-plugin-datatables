@@ -65,9 +65,9 @@ const getTargetCells = (api: DataTableApi<any>, cellType: CellType, pos: Pos): a
   }
 };
 
-const createCalcMethod = (cell: CellType, calculator: (values: number[]) => number): CalcMethod['calcMethod'] => {
+const createCalcMethod = (cellType: CellType, calculator: (values: number[]) => number): CalcMethod['calcMethod'] => {
   return (api: DataTableApi<any>, pos: Pos) => {
-    const targetCells = getTargetCells(api, cell, pos);
+    const targetCells = getTargetCells(api, cellType, pos);
     const calculableValues = convertToCalculableValues(targetCells);
     return calculator(calculableValues);
   };
