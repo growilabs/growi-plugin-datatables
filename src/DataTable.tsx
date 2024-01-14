@@ -83,6 +83,9 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       calculatedData.forEach(({ row, column, calcResult }) => {
         api.cell({ row, column }).data(calcResult);
       });
+
+      // どこかでソート順序が変わるので明示的に元の順序を設定する(issue#9)
+      (api.order as any).neutral().draw();
     };
 
     const displayEnablingDataTableButton = () => {
