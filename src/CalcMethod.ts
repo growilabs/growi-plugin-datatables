@@ -24,7 +24,7 @@ export const MethodTypes = Object.values(MethodType);
 
 export type MethodType = (typeof MethodType)[keyof typeof MethodType];
 
-type Cell = 'row' | 'column';
+type CellType = 'row' | 'column';
 
 type Pos = { row: number; column: number };
 
@@ -56,16 +56,16 @@ const convertToCalculableValues = (values: any[]): number[] => {
   return values.map((v) => convertToNumber(v)).filter((v) => v != null) as number[];
 };
 
-const getTargetCells = (api: DataTableApi<any>, cell: Cell, pos: Pos): any => {
-  if (cell === 'row') {
+const getTargetCells = (api: DataTableApi<any>, cellType: CellType, pos: Pos): any => {
+  if (cellType === 'row') {
     return api.row(pos.row).data();
   }
-  if (cell === 'column') {
+  if (cellType === 'column') {
     return api.column(pos.column).data().toArray();
   }
 };
 
-const createCalcMethod = (cell: Cell, calculator: (values: number[]) => number): CalcMethod['calcMethod'] => {
+const createCalcMethod = (cell: CellType, calculator: (values: number[]) => number): CalcMethod['calcMethod'] => {
   return (api: DataTableApi<any>, pos: Pos) => {
     const targetCells = getTargetCells(api, cell, pos);
     const calculableValues = convertToCalculableValues(targetCells);
