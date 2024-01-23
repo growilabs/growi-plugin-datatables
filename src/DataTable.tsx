@@ -7,7 +7,7 @@ import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
 
 import './DataTable.css';
-import { type MethodType, MethodTypes, getCalcMethod } from './CalcMethod';
+import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -50,7 +50,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       const calcData = getReplaceCellPositions(api);
       const calculatedData: Array<{ row: number; column: number; calcResult?: number }> = [];
       calcData.forEach(({ row, column, methodType }) => {
-        const calcResult = getCalcMethod(methodType)?.(api, { row, column });
+        const calcResult = CalcMethod[methodType](api, { row, column });
         calculatedData.push({ row, column, calcResult });
       });
 

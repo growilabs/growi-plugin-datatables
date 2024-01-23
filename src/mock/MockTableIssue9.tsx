@@ -38,7 +38,7 @@ const tableHTML = (
 );
 const DataTables = wrapDataTable(() => tableHTML);
 
-ReactDOM.createRoot(document.getElementById('MockTableForCaclMethod') as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById('MockTableIssue9') as HTMLElement).render(
   <React.StrictMode>
     <DataTables />
   </React.StrictMode>,
