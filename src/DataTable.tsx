@@ -46,9 +46,9 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       return replaceCellPositions;
     };
 
-    const handleCalcMethod = (api: DataTableApi<any>): Array<{ row: number; column: number; calcResult?: number }> => {
+    const handleCalcMethod = (api: DataTableApi<any>): Array<{ row: number; column: number; calcResult: number }> => {
       const calcData = getReplaceCellPositions(api);
-      const calculatedData: Array<{ row: number; column: number; calcResult?: number }> = [];
+      const calculatedData: Array<{ row: number; column: number; calcResult: number }> = [];
       calcData.forEach(({ row, column, methodType }) => {
         const calcResult = CalcMethod[methodType](api, { row, column });
         calculatedData.push({ row, column, calcResult });
@@ -108,7 +108,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
         <button id={buttonId} onClick={enableDataTable} className="btn btn-sm btn-secondary d-none gpdt-enabling-datatable">
           Enable DataTable
         </button>
-        <Table {...props}>{children}</Table>
+        <Table {...props}>{children}</Table>qq
       </div>
     );
   };
