@@ -1,0 +1,8 @@
+pull_request_rules:
+  - name: Automatic merge for Preparing next version
+    conditions:
+      - author = github-actions[bot]
+      - label = "type/prepare-next-version"
+    actions:
+      merge:
+        method: merge
