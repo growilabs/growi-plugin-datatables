@@ -1,6 +1,5 @@
 name: Release
 
-# repository Settings > Actions > General : Workflow permissions
 permissions:
   pull-requests: write
   contents: write

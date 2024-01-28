@@ -1,6 +1,5 @@
 name: Pull Request - Labelling
 
-# repository Settings > Actions > General : Workflow permissions
 permissions:
   pull-requests: write
 on:
