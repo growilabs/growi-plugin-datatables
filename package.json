@@ -1,6 +1,6 @@
 {
   "name": "growi-plugin-datatables",
-  "version": "1.0.1-RC.0",
+  "version": "1.0.0-RC.0",
   "description": "GROWI plugin that adapts datatables to tables on a page.",
   "type": "module",
   "repository": {
