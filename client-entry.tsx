@@ -1,5 +1,25 @@
+import { wrapDataTable } from './src/DataTable';
+
+declare const growiFacade: any;
+
 const activate = (): void => {
-  console.log('hello growi-plugin');
+  if (growiFacade == null || growiFacade.markdownRenderer == null) {
+    return;
+  }
+
+  const { optionsGenerators } = growiFacade.markdownRenderer;
+
+  const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
+
+  optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
+    const options = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
+    const Table = options.components.table;
+
+    // replace
+    options.components.table = wrapDataTable(Table);
+
+    return options;
+  };
 };
 
 const deactivate = (): void => {
