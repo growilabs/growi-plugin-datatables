@@ -17,18 +17,22 @@ shared:
         - check-success = labeling
 
 pull_request_rules:
-  - name: Toggle labels based on CI state
+  - name: All required actions were succeeded or skipped
     conditions:
       - and: *required_actions_were_succeeded_or_skipped
     actions:
-      label:
-        toggle:
-          - 'flag/ci-fail'
+      post_check:
+        title: required-actions-were-succeeded-or-skipped
+        success_conditions:
+          - and: *required_actions_were_succeeded_or_skipped
   - name: Automatic merge for Preparing next version
     conditions:
       - author = github-actions[bot]
       - label = "type/prepare-next-version"
       - label != flag/ci-fail
     actions:
+      review:
+        type: APPROVE
+        message: Automatically approving github-actions[bot]
       merge:
         method: merge
