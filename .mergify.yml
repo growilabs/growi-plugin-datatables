@@ -1,26 +1,34 @@
 shared:
   required_actions_were_succeeded_or_skipped: &required_actions_were_succeeded_or_skipped
     - or:
-        - check-success=check_artifacts_are_latest
-        - check-skipped=check_artifacts_are_latest
+        - check-success = check_artifacts_are_latest
+        - check-skipped = check_artifacts_are_latest
     - or:
-        - check-skipped=lint
-        - check-success=lint
+        - check-skipped = lint
+        - check-success = lint
     - or:
-        - check-skipped=build
-        - check-success=build
+        - check-skipped = build
+        - check-success = build
     - or:
-        - check-skipped=check-title
-        - check-success=check-title
+        - check-skipped = check-title
+        - check-success = check-title
     - or:
-        - check-skipped=labeling
-        - check-success=labeling
+        - check-skipped = labeling
+        - check-success = labeling
+
 pull_request_rules:
+  - name: Toggle labels based on CI state
+    conditions:
+      - and: *required_actions_were_succeeded_or_skipped
+    actions:
+      label:
+        toggle:
+          - 'flag/ci-fail'
   - name: Automatic merge for Preparing next version
     conditions:
       - author = github-actions[bot]
       - label = "type/prepare-next-version"
-      - and: *required_actions_were_succeeded_or_skipped
+      - label != flag/ci-fail
     actions:
       merge:
         method: merge
