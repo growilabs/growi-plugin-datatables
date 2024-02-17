@@ -29,7 +29,6 @@ pull_request_rules:
     conditions:
       - author = github-actions[bot]
       - label = "type/prepare-next-version"
-      - label != flag/ci-fail
     actions:
       review:
         type: APPROVE
