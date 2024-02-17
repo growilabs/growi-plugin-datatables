@@ -30,5 +30,8 @@ pull_request_rules:
       - label = "type/prepare-next-version"
       - label != flag/ci-fail
     actions:
+      review:
+        type: APPROVE
+        message: Automatically approving github-actions[bot]
       merge:
         method: merge
