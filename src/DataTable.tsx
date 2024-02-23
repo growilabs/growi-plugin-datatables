@@ -15,6 +15,7 @@ import 'datatables.net-searchpanes-bs4';
 
 import './DataTable.css';
 import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
+import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -81,14 +82,14 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
     };
     const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
       hideElement(event.target as HTMLElement);
-      const api = new DataTable(dtSelector, dataTableOptions);
+      const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
 
       api.on('order.dt', () => {
         const order = api.order();
         if (order.length <= 0) return;
 
         const orderSequenceWillBe = order[0][1];
-        if (orderSequenceWillBe !== 'pre') return;
+        if ((orderSequenceWillBe as OrderExtend) !== 'pre') return;
 
         (api.order as any).neutral().draw();
       });
