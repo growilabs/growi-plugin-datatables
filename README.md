@@ -11,7 +11,7 @@ DataTable is extended by following features.
 - Scrolling vertically (Max table height: 500px)
 - Extension buttons
   - "Column visibility" button: Toggle column visibility
-  - "SearchPanels" button: Filter rows for each column (by search value, by selection value)
+  - "SearchPanels" button: Filter rows for each column (by search value, by select value)
   - "Copy" button: Copy the table
   - "CSV" button: Download the table in CSV format
   - "Print" button: Print the table
