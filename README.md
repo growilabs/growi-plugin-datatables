@@ -9,11 +9,19 @@ DataTable is extended by following features.
 - Numerical values are in natural order
   - ex. "2.4m", "4.5m", "10.9m", ... (Ascending)
 - Scrolling vertically (Max table height: 500px)
+- Extension buttons
+  - "Column visibility" button: Toggle column visibility
+  - "SearchPanels" button: Filter rows for each column (by search value, by selection value)
+  - "Copy" button: Copy the table
+  - "CSV" button: Download the table in CSV format
+  - "Print" button: Print the table
 
 ### before adapt
 
-![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/1d045990-11e2-4d32-af79-9bb09b1775e3)
+![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/fed3b66b-6b1b-4dd3-9d2b-43693255eb49)
 
 ### after adapt and search with "carnivore" and sort by "Name"
 
-![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/b6e43820-66f8-41b9-8f68-21e86c3262e7)
+![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/6c516bcc-b3f3-4e50-a0c2-4acf2a6e3512)
+
+![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/73739b66-768d-4651-92a2-a2cce50d55ed)
