@@ -20,8 +20,8 @@ DataTable is extended by following features.
 
 ![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/fed3b66b-6b1b-4dd3-9d2b-43693255eb49)
 
-### after adapt and search with "carnivore" and sort by "Name"
+### after adapt and filter with "carnivore" and sort by "Name"
 
 ![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/6c516bcc-b3f3-4e50-a0c2-4acf2a6e3512)
 
-![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/73739b66-768d-4651-92a2-a2cce50d55ed)
+![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/2bd1c4e4-9159-490c-a7aa-dd2960e00c1c)
