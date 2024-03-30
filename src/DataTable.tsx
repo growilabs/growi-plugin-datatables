@@ -37,7 +37,7 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
      *   - "Print": テーブルを印刷
      */
     const dataTableOptions = {
-      dom: '<"mb-3"<"container-fluid"<"row"B>>t<"text-muted"i>lp>',
+      dom: '<"mb-3"<"container-fluid"<"d-flex justify-content-between"fB>>>t<"text-muted"i>lp>',
       columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], searchPanes: { show: true }, targets: '_all' }],
       order: [[0, 'pre']],
       paging: false,
