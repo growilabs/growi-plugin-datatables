@@ -5,9 +5,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
+import 'datatables.net-buttons-bs4';
+import 'datatables.net-buttons/js/dataTables.buttons';
+import 'datatables.net-buttons/js/buttons.colVis';
+import 'datatables.net-buttons/js/buttons.html5';
+import 'datatables.net-buttons/js/buttons.print';
+import 'datatables.net-select-bs4';
+import 'datatables.net-searchpanes-bs4';
 
 import './DataTable.css';
 import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
+import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 
 export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -21,14 +29,22 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
      * - 全カラムのソート順序を "初期順序"(デフォルト) => "昇順" => "降順" に設定
      * - ページネーションを無効化
      * - テーブルを縦スクロール化(縦幅は 500px)
+     * - 拡張機能のボタンを表示(ボタンは以下)
+     *   - "Column visibility" ボタン: カラムの表示・非表示をトグル
+     *   - "SearchPanels" ボタン: カラム毎のフィルタ（テキストフィルタ、選択フィルタ）
+     *   - "Copy": テーブルのコピー
+     *   - "CSV": テーブルを CSV 形式でダウンロード
+     *   - "Print": テーブルを印刷
      */
     const dataTableOptions = {
-      dom: '<"mb-3"<"container-fluid"<"row"f>>t<"text-muted"i>lp>',
-      columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], targets: '_all' }],
+      dom: '<"mb-3"<"container-fluid"<"d-flex justify-content-between"fB>>>t<"text-muted"i>lp>',
+      columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], searchPanes: { show: true }, targets: '_all' }],
       order: [[0, 'pre']],
       paging: false,
       scrollCollapse: true,
       scrollY: '500px',
+      select: true,
+      buttons: ['colvis', 'searchPanes', 'spacer', 'copyHtml5', 'spacer', 'csvHtml5', 'spacer', 'print'],
     };
 
     const getReplaceCellPositions = (api: DataTableApi<any>): Array<{ row: number; column: number; methodType: MethodType }> => {
@@ -66,14 +82,14 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
     };
     const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
       hideElement(event.target as HTMLElement);
-      const api = new DataTable(dtSelector, dataTableOptions);
+      const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
 
       api.on('order.dt', () => {
         const order = api.order();
         if (order.length <= 0) return;
 
         const orderSequenceWillBe = order[0][1];
-        if (orderSequenceWillBe !== 'pre') return;
+        if ((orderSequenceWillBe as OrderExtend) !== 'pre') return;
 
         (api.order as any).neutral().draw();
       });
