@@ -1,17 +1,17 @@
 import React from 'react';
 
-import DataTable, { type Api as DataTableApi } from 'datatables.net-bs4';
+import DataTable, { type Api as DataTableApi } from 'datatables.net-bs5';
 import { v4 as uuidv4 } from 'uuid';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
-import 'datatables.net-buttons-bs4';
+import 'datatables.net-buttons-bs5';
 import 'datatables.net-buttons/js/dataTables.buttons';
 import 'datatables.net-buttons/js/buttons.colVis';
 import 'datatables.net-buttons/js/buttons.html5';
 import 'datatables.net-buttons/js/buttons.print';
-import 'datatables.net-select-bs4';
-import 'datatables.net-searchpanes-bs4';
+import 'datatables.net-select-bs5';
+import 'datatables.net-searchpanes-bs5';
 
 import './DataTable.css';
 import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';

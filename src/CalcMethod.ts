@@ -1,4 +1,4 @@
-import { type Api as DataTableApi } from 'datatables.net-bs4';
+import { type Api as DataTableApi } from 'datatables.net-bs5';
 import { sum, mean, max, min, mode, median } from 'mathjs';
 
 /*
