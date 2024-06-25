@@ -1,6 +1,6 @@
 {
   "name": "growi-plugin-datatables",
-  "version": "1.0.0",
+  "version": "1.0.1-RC.0",
   "description": "GROWI plugin that adapts datatables to tables on a page.",
   "type": "module",
   "repository": {
@@ -25,8 +25,11 @@
     "lint:format": "yarn lint --fix"
   },
   "dependencies": {
-    "datatables.net-bs4": "^1.13.8",
-    "datatables.net-plugins": "^1.13.6",
+    "datatables.net-bs5": "^2.0.3",
+    "datatables.net-buttons-bs5": "^3.0.1",
+    "datatables.net-plugins": "^2.0.2",
+    "datatables.net-searchpanes-bs5": "^2.3.0",
+    "datatables.net-select-bs5": "^2.0.0",
     "mathjs": "^12.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
