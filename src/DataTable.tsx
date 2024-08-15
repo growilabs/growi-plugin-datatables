@@ -1,4 +1,5 @@
-import React from 'react';
+import { type FunctionComponent } from 'react';
+import Async from 'react-async';
 
 import DataTable, { type Api as DataTableApi } from 'datatables.net-bs5';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,11 +18,10 @@ import './DataTable.css';
 import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 
-export const wrapDataTable = (Table: React.FunctionComponent<any>): React.FunctionComponent<any> => {
+export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<any> => {
   return ({ children, ...props }) => {
     const containerId = uuidv4();
     const dtSelector = `#${containerId} table`;
-    const buttonId = uuidv4();
     /*
      * DataTable の設定
      * - DataTable 全体を div で括って class "mb-3" を付与
@@ -73,15 +73,12 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       return calculatedData;
     };
 
-    const displayElement = (target: HTMLElement) => {
-      target.classList.remove('d-none');
-    };
+    // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
+    // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
+    // そこで、async-react を使って、非同期の処理を行っている
+    const enableDataTable = async () => {
+      if (DataTable.isDataTable(dtSelector)) return;
 
-    const hideElement = (target: HTMLElement) => {
-      target.classList.add('d-none');
-    };
-    const enableDataTable = (event: React.MouseEvent<HTMLElement>) => {
-      hideElement(event.target as HTMLElement);
       const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
 
       api.on('order.dt', () => {
@@ -104,28 +101,12 @@ export const wrapDataTable = (Table: React.FunctionComponent<any>): React.Functi
       (api.order as any).neutral().draw();
     };
 
-    const displayEnablingDataTableButton = () => {
-      const element = document.getElementById(buttonId);
-      if (element == null) return;
-      if (DataTable.isDataTable(dtSelector)) return;
-
-      displayElement(element);
-    };
-
-    const hideEnablingDataTableButton = () => {
-      const element = document.getElementById(buttonId);
-      if (element == null) return;
-
-      hideElement(element);
-    };
-
     return (
-      <div id={containerId} className="position-relative" onMouseOver={displayEnablingDataTableButton} onMouseOut={hideEnablingDataTableButton}>
-        <button id={buttonId} onClick={enableDataTable} className="btn btn-sm btn-secondary d-none gpdt-enabling-datatable">
-          Enable DataTable
-        </button>
-        <Table {...props}>{children}</Table>
-      </div>
+      <Async promiseFn={enableDataTable}>
+        <div id={containerId} className="position-relative">
+          <Table {...props}>{children}</Table>
+        </div>
+      </Async>
     );
   };
 };
