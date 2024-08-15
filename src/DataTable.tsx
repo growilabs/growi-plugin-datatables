@@ -75,7 +75,7 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
 
     // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
     // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
-    // そこで、async-react を使って、非同期の処理を行っている
+    // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
     const enableDataTable = async () => {
       if (DataTable.isDataTable(dtSelector)) return;
 
