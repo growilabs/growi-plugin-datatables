@@ -1,6 +1,6 @@
 ## growi-plugin-datatables
 
-This [GROWI](https://github.com/weseek/growi)'s plugin add button whose adapt [DataTable](https://datatables.net/) to table.
+This [GROWI](https://github.com/weseek/growi)'s plugin adapt [DataTable](https://datatables.net/) to table.
 
 DataTable is extended by following features.
 
@@ -16,11 +16,7 @@ DataTable is extended by following features.
   - "CSV" button: Download the table in CSV format
   - "Print" button: Print the table
 
-### before adapt
-
-![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/fed3b66b-6b1b-4dd3-9d2b-43693255eb49)
-
-### after adapt and filter with "carnivore" and sort by "Name"
+### After filtering by "carnivore" and sorting by "Name"
 
 ![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/5491e0af-0150-4189-947e-e3c2acf85293)
 
