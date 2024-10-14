@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     manifest: true,
+    sourcemap: true,
     rollupOptions: {
       input: ['/client-entry.tsx'],
     },
