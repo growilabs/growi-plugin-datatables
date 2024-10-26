@@ -7,6 +7,7 @@ export default defineConfig({
   build: {
     manifest: true,
     sourcemap: false,
+    minify: false,
     rollupOptions: {
       input: ['/client-entry.tsx'],
       external: ['react'],
