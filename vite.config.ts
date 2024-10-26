@@ -11,6 +11,11 @@ export default defineConfig({
     rollupOptions: {
       input: ['/client-entry.tsx'],
       external: ['react'],
+      output: {
+        globals: {
+          react: 'React',
+        },
+      },
     },
   },
 });
