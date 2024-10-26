@@ -73,6 +73,7 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
     };
 
     useEffect(() => {
+      console.log('useEffect() is executed on growi-plugin-datatables');
       if (DataTable.isDataTable(dtSelector)) return;
 
       const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
