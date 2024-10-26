@@ -1,5 +1,4 @@
-import { type FunctionComponent } from 'react';
-import Async from 'react-async';
+import { useEffect, type FunctionComponent } from 'react';
 
 import DataTable, { type Api as DataTableApi } from 'datatables.net-bs5';
 import { v4 as uuidv4 } from 'uuid';
@@ -73,10 +72,7 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       return calculatedData;
     };
 
-    // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
-    // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
-    // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
-    const enableDataTable = async () => {
+    useEffect(() => {
       if (DataTable.isDataTable(dtSelector)) return;
 
       const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
@@ -99,14 +95,12 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
 
       // どこかでソート順序が変わるので明示的に元の順序を設定する(issue#9)
       (api.order as any).neutral().draw();
-    };
+    }, [dtSelector]);
 
     return (
-      <Async promiseFn={enableDataTable}>
-        <div id={containerId} className="position-relative">
-          <Table {...props}>{children}</Table>
-        </div>
-      </Async>
+      <div id={containerId} className="position-relative">
+        <Table {...props}>{children}</Table>
+      </div>
     );
   };
 };
