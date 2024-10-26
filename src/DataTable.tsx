@@ -98,6 +98,8 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       (api.order as any).neutral().draw();
     }, [dtSelector]);
 
+    console.log(useEffect);
+
     return (
       <div id={containerId} className="position-relative">
         <Table {...props}>{children}</Table>
