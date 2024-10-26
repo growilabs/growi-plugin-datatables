@@ -1,4 +1,3 @@
-import require$$0, { useEffect } from "react";
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -30167,6 +30166,7 @@ const CalcMethod = {
 };
 var jsxRuntime = { exports: {} };
 var reactJsxRuntime_production_min = {};
+var _global_React = React;
 /**
  * @license React
  * react-jsx-runtime.production.min.js
@@ -30176,7 +30176,7 @@ var reactJsxRuntime_production_min = {};
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-var f = require$$0, k = Symbol.for("react.element"), l = Symbol.for("react.fragment"), m = Object.prototype.hasOwnProperty, n = f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, p = { key: true, ref: true, __self: true, __source: true };
+var f = _global_React, k = Symbol.for("react.element"), l = Symbol.for("react.fragment"), m = Object.prototype.hasOwnProperty, n = f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, p = { key: true, ref: true, __self: true, __source: true };
 function q(c, a, g) {
   var b, d = {}, e = null, h = null;
   void 0 !== g && (e = "" + g);
@@ -30259,7 +30259,7 @@ const wrapDataTable = (Table) => {
       });
       return calculatedData;
     };
-    useEffect(() => {
+    React.useEffect(() => {
       console.log("useEffect() is executed on growi-plugin-datatables");
       if (DataTable$1.isDataTable(dtSelector))
         return;
@@ -30286,7 +30286,7 @@ const wrapDataTable = (Table) => {
       });
       api.order.neutral().draw();
     }, [dtSelector]);
-    console.log(useEffect);
+    console.log(React.useEffect);
     return /* @__PURE__ */ jsx("div", {
       id: containerId,
       className: "position-relative",
