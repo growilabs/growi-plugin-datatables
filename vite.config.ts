@@ -9,6 +9,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: ['/client-entry.tsx'],
+      external: ['react'],
     },
   },
 });
