@@ -31245,26 +31245,26 @@ reactJsxRuntime_production_min.jsxs = q;
     module.exports = reactJsxRuntime_production_min;
   }
 })(jsxRuntime);
-var _global_React = React;
-/**
- * @license React
- * react-jsx-runtime.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-var f = _global_React,
-  k = Symbol.for('react.element'),
-  l = Symbol.for('react.fragment'),
-  m = Object.prototype.hasOwnProperty,
-  n = f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,
-  p = { key: true, ref: true, __self: true, __source: true };
-
 const jsx = jsxRuntime.exports.jsx;
 const wrapDataTable = (Table) => {
   return ({ children, ...props }) => {
+    var _global_React = React;
+    /**
+     * @license React
+     * react-jsx-runtime.production.min.js
+     *
+     * Copyright (c) Facebook, Inc. and its affiliates.
+     *
+     * This source code is licensed under the MIT license found in the
+     * LICENSE file in the root directory of this source tree.
+     */
+    var f = _global_React,
+      k = Symbol.for('react.element'),
+      l = Symbol.for('react.fragment'),
+      m = Object.prototype.hasOwnProperty,
+      n = f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,
+      p = { key: true, ref: true, __self: true, __source: true };
+
     const containerId = v4();
     const dtSelector = `#${containerId} table`;
     const dataTableOptions = {
