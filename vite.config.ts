@@ -11,10 +11,12 @@ export default defineConfig({
     minify: false,
     rollupOptions: {
       input: ['/client-entry.tsx'],
-      external: ['react'],
+      // external: ['react', /node_modules\/react\/jsx-runtime\.js/],
+      external: ['react', 'react/jsx-runtime'],
       plugins: [
         externalGlobals({
           react: 'window.React',
+          'react/jsx-runtime': 'window.ReactJSXRuntime',
         }),
       ],
     },
