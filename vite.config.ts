@@ -14,7 +14,7 @@ export default defineConfig({
       external: ['react'],
       plugins: [
         externalGlobals({
-          react: 'React',
+          react: 'window.React',
         }),
       ],
     },
