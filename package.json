@@ -33,7 +33,6 @@
     "datatables.net-select-bs5": "^2.0.0",
     "mathjs": "^12.3.0",
     "react": "^18.2.0",
-    "react-async": "^10.0.1",
     "react-dom": "^18.2.0",
     "react-innertext": "^1.1.5",
     "uuid": "^9.0.1"

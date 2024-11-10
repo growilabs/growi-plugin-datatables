@@ -1,5 +1,4 @@
 import { type FunctionComponent } from 'react';
-import Async from 'react-async';
 
 import DataTable, { type Api as DataTableApi } from 'datatables.net-bs5';
 import { v4 as uuidv4 } from 'uuid';
@@ -102,11 +101,9 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
     };
 
     return (
-      <Async promiseFn={enableDataTable}>
-        <div id={containerId} className="position-relative">
-          <Table {...props}>{children}</Table>
-        </div>
-      </Async>
+      <div id={containerId} className="position-relative">
+        <Table {...props}>{children}</Table>
+      </div>
     );
   };
 };
