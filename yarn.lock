@@ -933,6 +933,11 @@ datatables.net-plugins@^2.0.2:
     "@types/jquery" "^3.5.16"
     datatables.net "^2"
 
+datatables.net-react@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/datatables.net-react/-/datatables.net-react-1.0.0.tgz#c1d499f997609922895785b19f24cfb4af00caf9"
+  integrity sha512-Rhuxu5KEnEHC8rCbXhwcLZ+tbjWkCiI7X8nj5p6+6UT5RHqJpKYjDxLQZnva0sLLOCSvmjHS+3TatzckTAk+Pw==
+
 datatables.net-searchpanes-bs5@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/datatables.net-searchpanes-bs5/-/datatables.net-searchpanes-bs5-2.3.0.tgz#435c83f35767529dbdcf293cf12265c14f8adbcb"
