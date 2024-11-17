@@ -1,4 +1,4 @@
-import { wrapDataTable } from './src/DataTable';
+import { adaptDataTable } from './src/DataTable';
 
 declare const growiFacade: any;
 
@@ -13,17 +13,13 @@ const activate = (): void => {
 
   optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
     const options = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
-    const Table = options.components.table;
-
-    // replace
-    options.components.table = wrapDataTable(Table);
+    options.rehypePlugins.push(adaptDataTable);
 
     return options;
   };
 };
 
-const deactivate = (): void => {
-};
+const deactivate = (): void => {};
 
 // register activate
 if ((window as any).pluginActivators == null) {
@@ -34,4 +30,4 @@ if ((window as any).pluginActivators == null) {
   deactivate,
 };
 
-export{};
+export {};

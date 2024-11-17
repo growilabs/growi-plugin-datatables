@@ -1,4 +1,4 @@
-import { type Api as DataTableApi } from 'datatables.net-bs5';
+import type { TableData } from './TableData';
 import { sum, mean, max, min, mode, median } from 'mathjs';
 
 /*
@@ -28,7 +28,7 @@ type CellType = 'row' | 'column';
 
 type Pos = { row: number; column: number };
 
-type CalcMethod = (api: DataTableApi<any>, pos: Pos) => number;
+type CalcMethod = (data: TableData, pos: Pos) => number;
 
 /*
  * Functions
@@ -53,18 +53,18 @@ const convertToCalculableValues = (values: any[]): number[] => {
   return values.map((v) => convertToNumber(v)).filter((v) => v != null) as number[];
 };
 
-const getTargetCells = (api: DataTableApi<any>, cellType: CellType, pos: Pos): any => {
+const getTargetCells = (data: TableData, cellType: CellType, pos: Pos): any => {
   if (cellType === 'row') {
-    return api.row(pos.row).data();
+    return data[pos.row];
   }
   if (cellType === 'column') {
-    return api.column(pos.column).data().toArray();
+    return data.map((row) => row[pos.column]);
   }
 };
 
 const createCalcMethod = (cellType: CellType, calculator: (values: number[]) => number): CalcMethod => {
-  return (api: DataTableApi<any>, pos: Pos) => {
-    const targetCells = getTargetCells(api, cellType, pos);
+  return (data: TableData, pos: Pos) => {
+    const targetCells = getTargetCells(data, cellType, pos);
     const calculableValues = convertToCalculableValues(targetCells);
     return calculator(calculableValues);
   };
