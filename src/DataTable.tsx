@@ -30,6 +30,7 @@ import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 
 function extractHeader(table: Element): TableColumns {
   let tableColumns: TableColumns = [];
+
   visit(table, { type: 'element', tagName: 'thead' }, (thead) => {
     visit(thead, { type: 'element', tagName: 'tr' }, (tr) => {
       visit(tr, { type: 'element', tagName: 'th' }, (th) => {
