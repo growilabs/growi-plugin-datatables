@@ -152,9 +152,7 @@ function createDataTable(columns: TableColumns, data: TableData) {
 export const adaptDataTable: Plugin = () => {
   return (tree) => {
     visit(tree, { type: 'element', tagName: 'table' }, (node: Element, index, parent: Parent) => {
-      if (parent == null || index == null) {
-        return;
-      }
+      if (parent == null || index == null) return;
 
       const header = extractHeader(node);
       const body = extractBody(node);
