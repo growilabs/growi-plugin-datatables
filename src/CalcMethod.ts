@@ -1,4 +1,3 @@
-import type { TableData } from './TableData';
 import { sum, mean, max, min, mode, median } from 'mathjs';
 
 /*
