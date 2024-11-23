@@ -1,3 +1,4 @@
+import { calcTable } from './src/CalcTable';
 import { adaptDataTable } from './src/DataTable';
 
 declare const growiFacade: any;
@@ -9,13 +10,22 @@ const activate = (): void => {
 
   const { optionsGenerators } = growiFacade.markdownRenderer;
 
+  // For page view
   const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
-
   optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
-    const options = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
-    options.rehypePlugins.push(adaptDataTable);
+    const viewOptions = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
+    viewOptions.rehypePlugins.push(calcTable);
 
-    return options;
+    return viewOptions;
+  };
+
+  // For preview
+  const originalCustomPreViewOptions = optionsGenerators.customGeneratePreViewOptions;
+  optionsGenerators.customGeneratePreviewOptions = (...args: any[]) => {
+    const previewOptions = originalCustomPreViewOptions ? originalCustomPreViewOptions(...args) : optionsGenerators.generatePreviewOptions(...args);
+    previewOptions.rehypePlugins.push(calcTable);
+
+    return previewOptions;
   };
 };
 
