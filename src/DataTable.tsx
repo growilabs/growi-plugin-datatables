@@ -6,8 +6,6 @@ import { Element, Parent } from 'hast';
 // import { useRef } from 'react';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { GrowiNode } from './GrowiNode';
-import { isGrowiNode } from './isGrowiNode';
 import type { TableData } from './TableData';
 import type { TableColumns } from './TableColumn';
 
