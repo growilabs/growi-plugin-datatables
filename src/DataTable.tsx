@@ -1,7 +1,8 @@
 import 'hastscript';
 /** @jsxImportSource hastscript */
 
-import type { Node, Parent } from 'unist';
+import { Element, Parent } from 'hast';
+
 // import { useRef } from 'react';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
@@ -27,25 +28,33 @@ import './DataTable.css';
 import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 
-function extractHeader(table: GrowiNode): TableColumns {
-  const thead = table.children[0]; // Expect thead to be present first
-  const th = thead?.children[0];
-  const tdList = th?.children;
-  if (thead == null || th == null || tdList == null) {
-    return [];
-  }
-
-  return tdList.map((col) => ({ data: col.children[0].value }));
+function extractHeader(table: Element): TableColumns {
+  let tableColumns: TableColumns = [];
+  visit(table, { type: 'element', tagName: 'thead' }, (thead) => {
+    visit(thead, { type: 'element', tagName: 'tr' }, (tr) => {
+      visit(tr, { type: 'element', tagName: 'th' }, (th) => {
+        visit(th, 'text', (thText) => {
+          tableColumns.push({ data: thText.value });
+        });
+      });
+    });
+  });
+  return tableColumns;
 }
 
-function extractBody(table: GrowiNode): TableData {
-  const tbody = table.children[1]; // Expect tbody to be second
-  const trList = tbody?.children;
-  if (tbody == null || trList == null) {
-    return [[]];
-  }
+function extractBody(table: Element): TableData {
+  let tableData: TableData = [];
 
-  return trList.map((row) => row.children.map((cell) => cell.children[0].value));
+  visit(table, { type: 'element', tagName: 'tbody' }, (tbody) => {
+    visit(tbody, { type: 'element', tagName: 'tr' }, (tr) => {
+      visit(tr, { type: 'element', tagName: 'td' }, (td) => {
+        visit(td, 'text', (tdText) => {
+          tableData.push(tdText.value);
+        });
+      });
+    });
+  });
+  return tableData;
 }
 
 function calculateData(data: TableData) {
@@ -143,20 +152,18 @@ function createDataTable(columns: TableColumns, data: TableData) {
  */
 export const adaptDataTable: Plugin = () => {
   return (tree) => {
-    visit(tree, 'element', (node: Node, index, parent: Parent) => {
-      if (isGrowiNode(node)) {
-        if (node.tagName !== 'table' || parent == null || index == null) {
-          return;
-        }
-
-        const header = extractHeader(node);
-        const body = extractBody(node);
-
-        calculateData(body);
-
-        const dataTable = createDataTable(header, body);
-        parent.children[index].data = dataTable;
+    visit(tree, { type: 'element', tagName: 'table' }, (node: Element, index, parent: Parent) => {
+      if (parent == null || index == null) {
+        return;
       }
+
+      const header = extractHeader(node);
+      const body = extractBody(node);
+
+      calculateData(body);
+
+      const dataTable = createDataTable(header, body);
+      parent.children[index].data = dataTable;
     });
   };
 };
