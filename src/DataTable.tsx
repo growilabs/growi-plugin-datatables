@@ -5,8 +5,10 @@ import type { Node, Parent } from 'unist';
 // import { useRef } from 'react';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
-import { type GrowiNode, isGrowiNode } from './GrowiNode';
-import type { TableColumns, TableData } from './TableData';
+import type { GrowiNode } from './GrowiNode';
+import { isGrowiNode } from './isGrowiNode';
+import type { TableData } from './TableData';
+import type { TableColumns } from './TableColumn';
 
 import DataTable, { DataTableRef } from 'datatables.net-react';
 import DT from 'datatables.net-bs5';
