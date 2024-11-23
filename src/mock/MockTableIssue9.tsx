@@ -1,12 +1,10 @@
 import React from 'react';
 
 import ReactDOM from 'react-dom/client';
-import rehypeParse from 'rehype-parse';
-import { unified } from 'unified';
 
-import { adaptDataTable } from '../DataTable';
+import { wrapDataTable } from '../DataTable';
 
-const tableHTML = `
+const tableHTML = (
   <table className="table table-bordered">
     <thead>
       <tr>
@@ -37,8 +35,8 @@ const tableHTML = `
       </tr>
     </tbody>
   </table>
-`;
-const DataTables = (await (await unified().use(rehypeParse, { fragment: true }).use(adaptDataTable).process(tableHTML)).result) as any;
+);
+const DataTables = wrapDataTable(() => tableHTML);
 
 ReactDOM.createRoot(document.getElementById('MockTableIssue9') as HTMLElement).render(
   <React.StrictMode>
