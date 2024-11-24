@@ -42,6 +42,7 @@
   "devDependencies": {
     "@babel/core": "^7.23.7",
     "@babel/eslint-parser": "^7.23.3",
+    "@preact/preset-vite": "^2.9.1",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/unist": "^3.0.3",
