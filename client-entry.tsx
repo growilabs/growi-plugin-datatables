@@ -15,6 +15,7 @@ const activate = (): void => {
   optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
     const viewOptions = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
     viewOptions.rehypePlugins.push(calcTable);
+    viewOptions.rehypePlugins.push(adaptDataTable);
 
     return viewOptions;
   };
@@ -24,6 +25,7 @@ const activate = (): void => {
   optionsGenerators.customGeneratePreviewOptions = (...args: any[]) => {
     const previewOptions = originalCustomPreViewOptions ? originalCustomPreViewOptions(...args) : optionsGenerators.generatePreviewOptions(...args);
     previewOptions.rehypePlugins.push(calcTable);
+    previewOptions.rehypePlugins.push(adaptDataTable);
 
     return previewOptions;
   };
