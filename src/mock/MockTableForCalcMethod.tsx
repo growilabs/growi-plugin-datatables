@@ -9,7 +9,6 @@ import { calcTable } from '../CalcTable';
 import { adaptDataTable, dataTableAdapter } from '../DataTable';
 import DataTable, { DataTableRef } from 'datatables.net-react';
 import DT from 'datatables.net-bs5';
-import 'datatables.net-bs5';
 DataTable.use(DT);
 
 const tableHTML = `
@@ -104,8 +103,6 @@ const processor = unified()
       table: dataTableAdapter,
     } as any,
   });
-
-// console.log(processor.processSync(tableHTML).result);
 
 ReactDOM.createRoot(document.getElementById('MockTableForCaclMethod') as HTMLElement).render(
   <React.StrictMode>{processor.processSync(tableHTML).result}</React.StrictMode>,
