@@ -1,9 +1,13 @@
-import { type FunctionComponent } from 'react';
-import Async from 'react-async';
+import { h } from 'hastscript';
 
-import DataTable from 'datatables.net-bs5';
-import { v4 as uuidv4 } from 'uuid';
+import { Element, Parent } from 'hast';
 
+// import { useRef } from 'react';
+import type { Plugin } from 'unified';
+import { visit } from 'unist-util-visit';
+
+import DataTable, { DataTableRef } from 'datatables.net-react';
+import DT from 'datatables.net-bs5';
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
 import 'datatables.net-buttons-bs5';
@@ -17,63 +21,83 @@ import 'datatables.net-searchpanes-bs5';
 import './DataTable.css';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 
-export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<any> => {
-  return ({ children, ...props }) => {
-    const containerId = uuidv4();
-    const dtSelector = `#${containerId} table`;
-    /*
-     * DataTable の設定
-     * - DataTable 全体を div で括って class "mb-3" を付与
-     * - 全カラムに "natural" ソートを有効化
-     * - 全カラムのソート順序を "初期順序"(デフォルト) => "昇順" => "降順" に設定
-     * - ページネーションを無効化
-     * - テーブルを縦スクロール化(縦幅は 500px)
-     * - 拡張機能のボタンを表示(ボタンは以下)
-     *   - "Column visibility" ボタン: カラムの表示・非表示をトグル
-     *   - "SearchPanels" ボタン: カラム毎のフィルタ（テキストフィルタ、選択フィルタ）
-     *   - "Copy": テーブルのコピー
-     *   - "CSV": テーブルを CSV 形式でダウンロード
-     *   - "Print": テーブルを印刷
-     */
-    const dataTableOptions = {
-      dom: '<"mb-3"<"container-fluid"<"d-flex justify-content-between"fB>>>t<"text-muted"i>lp>',
-      columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], searchPanes: { show: true }, targets: '_all' }],
-      order: [[0, 'pre']],
-      paging: false,
-      scrollCollapse: true,
-      scrollY: '500px',
-      select: true,
-      buttons: ['colvis', 'searchPanes', 'spacer', 'copyHtml5', 'spacer', 'csvHtml5', 'spacer', 'print'],
-    };
+const idForDataTables = 'growi-plugin-datatables';
 
-    // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
-    // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
-    // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
-    const enableDataTable = async () => {
-      if (DataTable.isDataTable(dtSelector)) return;
+function createTableIdentifiedForDataTables() {
+  // TBD
+  // const table = useRef<DataTableRef>();
+  // const api = table.current!.dt();
 
-      const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
+  /*
+   * DataTable の設定
+   * - DataTable 全体を div で括って class "mb-3" を付与
+   * - 全カラムに "natural" ソートを有効化
+   * - 全カラムのソート順序を "初期順序"(デフォルト) => "昇順" => "降順" に設定
+   * - ページネーションを無効化
+   * - テーブルを縦スクロール化(縦幅は 500px)
+   * - 拡張機能のボタンを表示(ボタンは以下)
+   *   - "Column visibility" ボタン: カラムの表示・非表示をトグル
+   *   - "SearchPanels" ボタン: カラム毎のフィルタ（テキストフィルタ、選択フィルタ）
+   *   - "Copy": テーブルのコピー
+   *   - "CSV": テーブルを CSV 形式でダウンロード
+   *   - "Print": テーブルを印刷
+   */
+  const dataTableOptions = {
+    dom: '<"mb-3"<"container-fluid"<"d-flex justify-content-between"fB>>>t<"text-muted"i>lp>',
+    columnDefs: [
+      {
+        type: 'natural',
+        orderSequence: ['asc', 'desc', 'pre'],
+        searchPanes: { show: true },
+        targets: '_all',
+      },
+    ],
+    order: [[0, 'pre']],
+    paging: false,
+    scrollCollapse: true,
+    scrollY: '500px',
+    select: true,
+    buttons: ['colvis', 'searchPanes', 'spacer', 'copyHtml5', 'spacer', 'csvHtml5', 'spacer', 'print'],
+  } as ConfigWeaken;
 
-      api.on('order.dt', () => {
-        const order = api.order();
-        if (order.length <= 0) return;
+  // TBD
+  // if (api) {
+  //   api.on('order.dt', () => {
+  //     const order = api.order();
+  //     if (order.length <= 0) return;
 
-        const orderSequenceWillBe = order[0][1];
-        if ((orderSequenceWillBe as OrderExtend) !== 'pre') return;
+  //     const orderSequenceWillBe = order[0][1];
+  //     if ((orderSequenceWillBe as OrderExtend) !== 'pre') return;
 
-        (api.order as any).neutral().draw();
-      });
+  //     (api.order as any).neutral().draw();
+  //   });
+  // }
 
-      // どこかでソート順序が変わるので明示的に元の順序を設定する(issue#9)
-      (api.order as any).neutral().draw();
-    };
+  return h('table', { dataJsComponent: idForDataTables, options: dataTableOptions } as any);
+}
 
-    return (
-      <Async promiseFn={enableDataTable}>
-        <div id={containerId} className="position-relative">
-          <Table {...props}>{children}</Table>
-        </div>
-      </Async>
-    );
+export const dataTableAdapter = (props: any) => {
+  if (props['data-js-component'] !== idForDataTables) return <table {...props} />;
+
+  return <DataTable {...props} />;
+};
+
+/**
+ * unified plugin that adapt DataTable to table
+ *
+ * @returns unified plugin
+ */
+export const adaptDataTable: Plugin = () => {
+  return (tree) => {
+    visit(tree, { type: 'element', tagName: 'table' }, (node: Element, index, parent: Parent) => {
+      if (parent == null || index == null) return;
+
+      DataTable.use(DT);
+
+      // replace table with new table identified for DataTables
+      const newTable = createTableIdentifiedForDataTables();
+      newTable.children = node.children;
+      parent.children[index] = newTable;
+    });
   };
 };

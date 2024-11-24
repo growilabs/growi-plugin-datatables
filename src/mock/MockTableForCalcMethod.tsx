@@ -1,12 +1,16 @@
 import rehypeReact from 'rehype-react';
-import React from 'react';
+import React, { Fragment } from 'react';
 import * as prod from 'react/jsx-runtime';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 import ReactDOM from 'react-dom/client';
 
 import { calcTable } from '../CalcTable';
-import { wrapDataTable } from '../DataTable';
+import { adaptDataTable, dataTableAdapter } from '../DataTable';
+import DataTable, { DataTableRef } from 'datatables.net-react';
+import DT from 'datatables.net-bs5';
+import 'datatables.net-bs5';
+DataTable.use(DT);
 
 const tableHTML = `
   <table className="table table-bordered">
@@ -88,21 +92,21 @@ const tableHTML = `
     </tbody>
   </table>
 `;
-const dataTables = await unified()
+const processor = unified()
   .use(rehypeParse, { fragment: true })
   .use(calcTable)
+  .use(adaptDataTable)
   .use(rehypeReact, {
     Fragment: prod.Fragment,
     jsx: prod.jsx,
     jsxs: prod.jsxs,
-  })
-  .process(tableHTML);
-const Result = dataTables.result;
+    components: {
+      table: dataTableAdapter,
+    } as any,
+  });
 
-const DataTables = wrapDataTable(() => Result);
+// console.log(processor.processSync(tableHTML).result);
 
 ReactDOM.createRoot(document.getElementById('MockTableForCaclMethod') as HTMLElement).render(
-  <React.StrictMode>
-    <DataTables />
-  </React.StrictMode>,
+  <React.StrictMode>{processor.processSync(tableHTML).result}</React.StrictMode>,
 );
