@@ -5,11 +5,11 @@ import { visit } from 'unist-util-visit';
 import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 
 function extractBody(table: Element): TableData {
-  let tableData: TableData = [];
+  const tableData: TableData = [];
 
   visit(table, { type: 'element', tagName: 'tbody' }, (tbody) => {
     visit(tbody, { type: 'element', tagName: 'tr' }, (tr) => {
-      let row: Array<any> = [];
+      const row: Array<any> = [];
       visit(tr, { type: 'element', tagName: 'td' }, (td) => {
         visit(td, 'text', (tdText) => {
           row.push(tdText.value);
@@ -37,8 +37,8 @@ function getReplaceCellPositions(data: TableData): Array<{ row: number; column: 
 }
 
 function handleCalcMethod(
-  data: TableData,
-  calcData: Array<{ row: number; column: number; methodType: MethodType }>,
+    data: TableData,
+    calcData: Array<{ row: number; column: number; methodType: MethodType }>,
 ): Array<{ row: number; column: number; calcResult?: number }> {
   const calculatedData: Array<{ row: number; column: number; calcResult?: number }> = [];
   calcData.forEach(({ row, column, methodType }) => {
@@ -50,15 +50,15 @@ function handleCalcMethod(
 }
 
 function replaceCalculatedData(table: Element, calculatedData: Array<{ row: number; column: number; calcResult?: number }>) {
-  let row = 0,
-    col = 0;
+  let row = 0;
+  let col = 0;
 
   visit(table, { type: 'element', tagName: 'tbody' }, (tbody) => {
     row = 0;
     visit(tbody, { type: 'element', tagName: 'tr' }, (tr) => {
       col = 0;
       visit(tr, { type: 'element', tagName: 'td' }, (td) => {
-        const d = calculatedData.find((it) => it.row == row && it.column == col);
+        const d = calculatedData.find((it) => it.row === row && it.column === col);
         col++;
         if (d == null) return;
 
