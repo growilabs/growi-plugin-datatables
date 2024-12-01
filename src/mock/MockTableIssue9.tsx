@@ -6,10 +6,7 @@ import { unified } from 'unified';
 import ReactDOM from 'react-dom/client';
 
 import { calcTable } from '../CalcTable';
-import { adaptDataTable, dataTableAdapter } from '../DataTable';
-import DataTable, { DataTableRef } from 'datatables.net-react';
-import DT from 'datatables.net-bs5';
-DataTable.use(DT);
+import { wrapDataTable } from '../DataTable';
 
 const tableHTML = `
   <table className="table table-bordered">
@@ -43,19 +40,15 @@ const tableHTML = `
     </tbody>
   </table>
 `;
-const processor = unified()
-  .use(rehypeParse, { fragment: true })
-  .use(calcTable)
-  .use(adaptDataTable)
-  .use(rehypeReact, {
-    Fragment: prod.Fragment,
-    jsx: prod.jsx,
-    jsxs: prod.jsxs,
-    components: {
-      table: dataTableAdapter,
-    } as any,
-  });
+const processor = unified().use(rehypeParse, { fragment: true }).use(calcTable).use(rehypeReact, {
+  Fragment: prod.Fragment,
+  jsx: prod.jsx,
+  jsxs: prod.jsxs,
+});
+const DataTables = wrapDataTable(() => processor.processSync(tableHTML).result);
 
 ReactDOM.createRoot(document.getElementById('MockTableIssue9') as HTMLElement).render(
-  <React.StrictMode>{processor.processSync(tableHTML).result}</React.StrictMode>,
+  <React.StrictMode>
+    <DataTables />
+  </React.StrictMode>,
 );
