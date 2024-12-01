@@ -1,10 +1,14 @@
-import React from 'react';
-
+import rehypeReact from 'rehype-react';
+import React, { Fragment } from 'react';
+import * as prod from 'react/jsx-runtime';
+import rehypeParse from 'rehype-parse';
+import { unified } from 'unified';
 import ReactDOM from 'react-dom/client';
 
+import { calcTable } from '../CalcTable';
 import { wrapDataTable } from '../DataTable';
 
-const tableHTML = (
+const tableHTML = `
   <table className="table table-bordered">
     <thead>
       <tr>
@@ -25,7 +29,7 @@ const tableHTML = (
         <td>18</td>
         <td>4</td>
         <td>9</td>
-        <td>{'{hsum}'}</td>
+        <td>{hsum}</td>
       </tr>
       <tr>
         <td>15</td>
@@ -34,7 +38,7 @@ const tableHTML = (
         <td>6</td>
         <td>12</td>
         <td>8</td>
-        <td>{'{havg}'}</td>
+        <td>{havg}</td>
       </tr>
       <tr>
         <td>5</td>
@@ -43,7 +47,7 @@ const tableHTML = (
         <td>11</td>
         <td>19</td>
         <td>10</td>
-        <td>{'{hmax}'}</td>
+        <td>{hmax}</td>
       </tr>
       <tr>
         <td>16</td>
@@ -52,7 +56,7 @@ const tableHTML = (
         <td>8</td>
         <td>1</td>
         <td>20</td>
-        <td>{'{hmin}'}</td>
+        <td>{hmin}</td>
       </tr>
       <tr>
         <td>9</td>
@@ -61,7 +65,7 @@ const tableHTML = (
         <td>3</td>
         <td>17</td>
         <td>17</td>
-        <td>{'{hmode}'}</td>
+        <td>{hmode}</td>
       </tr>
       <tr>
         <td>4</td>
@@ -70,22 +74,27 @@ const tableHTML = (
         <td>2</td>
         <td>6</td>
         <td>15</td>
-        <td>{'{hmedian}'}</td>
+        <td>{hmedian}</td>
       </tr>
       <tr>
-        <td>{'{vsum}'}</td>
-        <td>{'{vavg}'}</td>
-        <td>{'{vmax}'}</td>
-        <td>{'{vmin}'}</td>
-        <td>{'{vmode}'}</td>
-        <td>{'{vmedian}'}</td>
+        <td>{vsum}</td>
+        <td>{vavg}</td>
+        <td>{vmax}</td>
+        <td>{vmin}</td>
+        <td>{vmode}</td>
+        <td>{vmedian}</td>
         <td></td>
       </tr>
     </tbody>
   </table>
-);
-const DataTables = wrapDataTable(() => tableHTML);
+`;
+const processor = unified().use(rehypeParse, { fragment: true }).use(calcTable).use(rehypeReact, {
+  Fragment: prod.Fragment,
+  jsx: prod.jsx,
+  jsxs: prod.jsxs,
+});
 
+const DataTables = wrapDataTable(() => processor.processSync(tableHTML).result);
 ReactDOM.createRoot(document.getElementById('MockTableForCaclMethod') as HTMLElement).render(
   <React.StrictMode>
     <DataTables />

@@ -1,3 +1,4 @@
+import { calcTable } from './src/CalcTable';
 import { wrapDataTable } from './src/DataTable';
 
 declare const growiFacade: any;
@@ -9,21 +10,30 @@ const activate = (): void => {
 
   const { optionsGenerators } = growiFacade.markdownRenderer;
 
+  // For page view
   const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
-
   optionsGenerators.customGenerateViewOptions = (...args: any[]) => {
-    const options = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
-    const Table = options.components.table;
+    const viewOptions = originalCustomViewOptions ? originalCustomViewOptions(...args) : optionsGenerators.generateViewOptions(...args);
+    viewOptions.rehypePlugins.push(calcTable);
 
-    // replace
-    options.components.table = wrapDataTable(Table);
+    // replace table with DataTable
+    const Table = viewOptions.components.table;
+    viewOptions.components.table = wrapDataTable(Table);
 
-    return options;
+    return viewOptions;
+  };
+
+  // For preview
+  const originalCustomPreViewOptions = optionsGenerators.customGeneratePreViewOptions;
+  optionsGenerators.customGeneratePreviewOptions = (...args: any[]) => {
+    const previewOptions = originalCustomPreViewOptions ? originalCustomPreViewOptions(...args) : optionsGenerators.generatePreviewOptions(...args);
+    previewOptions.rehypePlugins.push(calcTable);
+
+    return previewOptions;
   };
 };
 
-const deactivate = (): void => {
-};
+const deactivate = (): void => {};
 
 // register activate
 if ((window as any).pluginActivators == null) {
@@ -34,4 +44,4 @@ if ((window as any).pluginActivators == null) {
   deactivate,
 };
 
-export{};
+export {};

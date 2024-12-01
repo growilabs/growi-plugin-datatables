@@ -1,7 +1,7 @@
 import { type FunctionComponent } from 'react';
 import Async from 'react-async';
 
-import DataTable, { type Api as DataTableApi } from 'datatables.net-bs5';
+import DataTable from 'datatables.net-bs5';
 import { v4 as uuidv4 } from 'uuid';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
@@ -15,7 +15,6 @@ import 'datatables.net-select-bs5';
 import 'datatables.net-searchpanes-bs5';
 
 import './DataTable.css';
-import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 
 export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<any> => {
@@ -47,32 +46,6 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       buttons: ['colvis', 'searchPanes', 'spacer', 'copyHtml5', 'spacer', 'csvHtml5', 'spacer', 'print'],
     };
 
-    const getReplaceCellPositions = (api: DataTableApi<any>): Array<{ row: number; column: number; methodType: MethodType }> => {
-      const replaceCellPositions = [];
-      const data = api.data().toArray();
-      for (let row = 0; row < data.length; row++) {
-        for (let column = 0; column < data[row].length; column++) {
-          const value = data[row][column].trim();
-          if (MethodTypes.includes(value)) {
-            replaceCellPositions.push({ row, column, methodType: value });
-          }
-        }
-      }
-
-      return replaceCellPositions;
-    };
-
-    const handleCalcMethod = (api: DataTableApi<any>): Array<{ row: number; column: number; calcResult?: number }> => {
-      const calcData = getReplaceCellPositions(api);
-      const calculatedData: Array<{ row: number; column: number; calcResult?: number }> = [];
-      calcData.forEach(({ row, column, methodType }) => {
-        const calcResult = CalcMethod[methodType](api, { row, column });
-        calculatedData.push({ row, column, calcResult });
-      });
-
-      return calculatedData;
-    };
-
     // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
     // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
     // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
@@ -89,12 +62,6 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
         if ((orderSequenceWillBe as OrderExtend) !== 'pre') return;
 
         (api.order as any).neutral().draw();
-      });
-
-      // 計算処理と計算結果の置き換え処理は分ける (置き換えられる計算結果を考慮しない)
-      const calculatedData = handleCalcMethod(api);
-      calculatedData.forEach(({ row, column, calcResult }) => {
-        api.cell({ row, column }).data(calcResult);
       });
 
       // どこかでソート順序が変わるので明示的に元の順序を設定する(issue#9)
