@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/ryu-sato/growi-plugin-datatables#readme",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "yarn eslint --quiet \"src/**/*.{ts,tsx}\"",
