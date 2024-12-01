@@ -3,10 +3,8 @@
  */
 import type { Config, Order } from 'datatables.net-bs5';
 
-export interface ConfigWeaken extends Config {
+interface ConfigWeaken extends Config {
   order?: any;
-  // optimize type definition
-  columnDefs?: any;
 }
 
-export type OrderExtend = Order | 'pre';
+type OrderExtend = Order | 'pre';
