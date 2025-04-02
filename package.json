@@ -71,5 +71,6 @@
     "node": "20",
     "yarn": "1.22 < 2",
     "npm": "9"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
