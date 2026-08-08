@@ -65,6 +65,28 @@ const setSearchOpen = (api: Api<any>, open: boolean): void => {
 };
 
 /**
+ * ツールバー向けの文言設定。
+ *
+ * searchPanes のボタンだけは config.text が初期表示にしか使われない。
+ * パネルで絞り込むと filterChanged が走り、ボタンの中身が
+ * language.searchPanes.collapse の文言 ("SearchPanes (1)") で丸ごと差し替えられる
+ * (dataTables.searchPanes.js の ext.buttons.searchPanes を参照)。
+ * そのままだとアイコン 1 行の並びが崩れるので、差し替え先にもアイコンを据えておく。
+ * 絞り込み件数はアイコンの横に小さく出す。隠れている条件があることの手掛かりになる。
+ */
+export const toolbarLanguage = {
+  // ラベルの "Search:" はアイコンが担うので消し、代わりに入力欄へプレースホルダを置く
+  search: '',
+  searchPlaceholder: 'Search',
+  searchPanes: {
+    collapse: {
+      0: ICON_FUNNEL,
+      _: `${ICON_FUNNEL}<span class="gpdt-count">%d</span>`,
+    },
+  },
+};
+
+/**
  * ツールバーに並べるボタン。
  *
  * ラベルを全てアイコンに置き換えて 1 行に収めている。

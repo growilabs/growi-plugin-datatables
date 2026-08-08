@@ -10,9 +10,25 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
  * 対象は src/mock/MockTable50Lines.tsx / MockTable5Lines.tsx (index.html から読み込まれる)。
  */
 
-const CONTAINER = '#MockTable50Lines .dt-container';
+/*
+ * SearchPanes のパネルもそれぞれ .dt-container を持つ入れ子の DataTables なので、
+ * 単に "#MockTable50Lines .dt-container" と書くとパネルまで一緒に掴んでしまう。
+ * 直系の子だけを辿って本体のコンテナに限定する。
+ */
+const CONTAINER = '#MockTable50Lines > .position-relative > .dt-container';
 
 const ROWS = 50;
+
+/**
+ * 本体テーブルの行。
+ *
+ * SearchPanes のパネルもコンテナ内に置かれる DataTables なので、
+ * 単に .dt-scroll-body を引くとパネル側の行まで数えてしまう。
+ * 直系の子だけを辿って本体に限定する。
+ */
+const mainRows = (container: Locator): Locator => (
+  container.locator(':scope > .mb-3 > .dt-scroll > .dt-scroll-body tbody tr')
+);
 
 /**
  * 対象テーブルが初期化されて落ち着くまで待つ。
@@ -25,7 +41,7 @@ const openTable = async(page: Page): Promise<Locator> => {
 
   const container = page.locator(CONTAINER);
   await container.scrollIntoViewIfNeeded();
-  await expect(container.locator('.dt-scroll-body tbody tr').first()).toBeVisible();
+  await expect(mainRows(container).first()).toBeVisible();
 
   return container;
 };
@@ -81,7 +97,7 @@ test.describe('ツールバー', () => {
 
   test('検索欄を閉じると絞り込みも解除される', async({ page }) => {
     const container = await openTable(page);
-    const rows = container.locator('.dt-scroll-body tbody tr');
+    const rows = mainRows(container);
 
     expect(await rows.count()).toBe(ROWS);
 
@@ -109,7 +125,39 @@ test.describe('ツールバー', () => {
     await input.press('Escape');
 
     await expect.poll(() => searchWidth(container)).toBe(0);
-    await expect.poll(() => container.locator('.dt-scroll-body tbody tr').count()).toBe(ROWS);
+    await expect.poll(() => mainRows(container).count()).toBe(ROWS);
+  });
+
+  /*
+   * searchPanes のボタンは config.text が初期表示にしか使われず、
+   * パネルで絞り込むと filterChanged がボタンの中身を文言で丸ごと差し替える。
+   * language.searchPanes.collapse 側にもアイコンを据えていないとここで並びが崩れる。
+   */
+  test('SearchPanes で絞り込んでもボタンはアイコンのままでいる', async({ page }) => {
+    const container = await openTable(page);
+    const filters = container.locator('.gpdt-toolbar .gpdt-button[title="Filters"]');
+    const toolbar = container.locator('.gpdt-toolbar');
+    const heightBefore = (await toolbar.boundingBox())?.height;
+
+    await filters.click();
+
+    // 最初のパネルの先頭の値を選んで絞り込む
+    const pane = page.locator('div.dtsp-searchPane').first();
+    await expect(pane).toBeVisible();
+    await pane.locator('tbody tr').first().click();
+
+    await expect.poll(() => mainRows(container).count()).toBeLessThan(ROWS);
+
+    // アイコンは残り、件数だけが横に添えられる ("SearchPanes (1)" に化けない)
+    await expect(filters.locator('svg.gpdt-icon')).toHaveCount(1);
+    await expect(filters.locator('.gpdt-count')).toHaveText('1');
+    expect((await filters.innerText()).trim()).toBe('1');
+
+    // 件数はアイコンの横に収まり、行の高さを押し広げない
+    expect((await toolbar.boundingBox())?.height).toBe(heightBefore);
+
+    // 絞り込みが効いているのでフッターの件数表示も出る
+    await expect(container.locator('.gpdt-info')).toBeVisible();
   });
 
   test('ツールバーから開いたドロップダウンはマウスが離れても閉じない', async({ page }) => {
@@ -126,14 +174,14 @@ test.describe('ツールバー', () => {
 });
 
 test.describe('フッターの件数表示', () => {
-  const SMALL_TABLE = '#MockTable5Lines .dt-container';
+  const SMALL_TABLE = '#MockTable5Lines > .position-relative > .dt-container';
 
   test('絞り込み中だけ出る', async({ page }) => {
     await page.goto('/index.html');
 
     const container = page.locator(SMALL_TABLE);
     await container.scrollIntoViewIfNeeded();
-    await expect(container.locator('.dt-scroll-body tbody tr').first()).toBeVisible();
+    await expect(mainRows(container).first()).toBeVisible();
 
     const info = container.locator('.gpdt-info');
 

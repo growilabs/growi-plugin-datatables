@@ -88,8 +88,25 @@
   display: none;
 }
 
+/*
+ * DataTables はボタンの中身を span で包む。
+ * その span を横並びにしておかないと、アイコンの隣に出す件数が下の行に落ちて
+ * ボタンだけ背が高くなり、アイコン行の高さが揃わなくなる。
+ */
+.gpdt-toolbar .gpdt-button > span {
+  display: inline-flex;
+  align-items: center;
+}
+
 .gpdt-icon {
   display: block;
+}
+
+/* SearchPanes で絞り込んでいる件数。アイコンの横に添える */
+.gpdt-count {
+  margin-inline-start: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1;
 }
 
 /*

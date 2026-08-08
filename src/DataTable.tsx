@@ -16,7 +16,7 @@ import 'datatables.net-searchpanes-bs5';
 import './DataTable.css';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 import { waitUntilReadyToInitialize } from './initScheduler';
-import { setupToolbar, toolbarButtons } from './toolbar';
+import { setupToolbar, toolbarButtons, toolbarLanguage } from './toolbar';
 
 /*
  * 初期化済みのコンテナを覚えておく。
@@ -52,8 +52,7 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
      */
     const dataTableOptions = {
       dom: '<"mb-3"<"gpdt-toolbar"fB>t<"gpdt-info text-muted"i>>',
-      // ラベルの "Search:" はアイコンが担うので消し、代わりに入力欄へプレースホルダを置く
-      language: { search: '', searchPlaceholder: 'Search' },
+      language: toolbarLanguage,
       columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], searchPanes: { show: true }, targets: '_all' }],
       /*
        * 初期ソートはしない。
