@@ -2,3 +2,108 @@
 @import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.css';
 @import 'datatables.net-select-bs5/css/select.bootstrap5.css';
 @import 'datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.css';
+
+/*
+ * ツールバー。
+ *
+ * 常時見えるのはアイコン行だけで、検索欄はアイコンをクリックしたときに
+ * 同じ行の中で横に開く。行が増えないので、開閉でテーブルが上下に跳ねない。
+ */
+.gpdt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+
+  /*
+   * GROWI はテーブルにマウスを乗せると右上に編集アイコンを重ねて出す。
+   * ツールバーの右端をそのぶん空けておかないと、一番右のアイコンが隠れて押せなくなる。
+   * GROWI 側のアイコンサイズが変わったらこの変数だけ調整すればよい。
+   */
+  padding-inline-end: var(--gpdt-toolbar-offset-end, 2rem);
+}
+
+/* 検索欄は既定では幅 0 に畳んでおく (display: none だと開くときにアニメーションできない) */
+.gpdt-toolbar .dt-search {
+  flex: 0 1 auto;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: width 0.15s ease, opacity 0.15s ease;
+}
+
+.gpdt-search-open .gpdt-toolbar .dt-search {
+  width: 12rem;
+  opacity: 1;
+}
+
+/* ラベル文言はアイコンが担うので出さない (language.search を空にしても要素は残る) */
+.gpdt-toolbar .dt-search label {
+  display: none;
+}
+
+.gpdt-toolbar .dt-search input {
+  width: 100%;
+  margin: 0;
+}
+
+/*
+ * ボタンは記事本文の邪魔にならないよう、枠線と地の色を落としたアイコンボタンにする。
+ * bootstrap5 スタイルのボタンは dt-button ではなく btn btn-secondary (塗り潰し) が付くので、
+ * 自前で振った gpdt-button を掴んで上書きしている。
+ */
+.gpdt-toolbar .dt-buttons {
+  flex: 0 0 auto;
+  gap: 0.125rem;
+  margin: 0;
+}
+
+.gpdt-toolbar .gpdt-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.4rem;
+  border-color: transparent;
+  border-radius: var(--bs-border-radius, 0.25rem);
+  background: none;
+  box-shadow: none;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+/*
+ * 開いている状態の目印。
+ * bootstrap の .btn-secondary.active は塗り潰し + 高い詳細度で、記事中では主張が強すぎるうえ
+ * 上書きも面倒なので、bootstrap が触らない自前のクラスで状態を持たせている。
+ */
+.gpdt-toolbar .gpdt-button:hover,
+.gpdt-toolbar .gpdt-button:focus-visible,
+.gpdt-toolbar .gpdt-button-on {
+  background: var(--bs-secondary-bg, rgba(0, 0, 0, 0.075));
+  color: var(--bs-body-color, #212529);
+}
+
+/* collection ボタンのキャレットはアイコンの見た目を崩すので消す */
+.gpdt-toolbar .gpdt-button.dropdown-toggle::after {
+  display: none;
+}
+
+.gpdt-icon {
+  display: block;
+}
+
+/*
+ * フッターの件数表示。
+ *
+ * 全件表示中は "Showing 1 to N of N entries" としか出ず情報がないので隠し、
+ * 検索や SearchPanes で行が隠れているときだけ出す (toolbar.ts が gpdt-filtered を付ける)。
+ */
+.gpdt-info {
+  display: none;
+  padding-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.gpdt-filtered .gpdt-info {
+  display: block;
+}

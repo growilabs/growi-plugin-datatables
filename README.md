@@ -9,12 +9,22 @@ DataTable is extended by following features.
 - Numerical values are in natural order
   - ex. "2.4m", "4.5m", "10.9m", ... (Ascending)
 - Scrolling vertically (Max table height: 500px)
-- Extension buttons
-  - "Column visibility" button: Toggle column visibility
-  - "SearchPanels" button: Filter rows for each column (by search value, by select value)
-  - "Copy" button: Copy the table
-  - "CSV" button: Download the table in CSV format
-  - "Print" button: Print the table
+- Toolbar
+
+  Controls are collapsed into a compact icon row above the table, so a table that is only being
+  read stays close to a plain table. Nothing is revealed on hover, so the icons never compete with
+  GROWI's own "edit this table" icon.
+
+  - "Search" button: Expand a search box inline. Closing it also clears the search, so rows are
+    never hidden by a filter you cannot see.
+  - "Columns" button: Toggle column visibility
+  - "Filters" button: Filter rows for each column (by search value, by select value)
+  - "Export" button: Copy / download as CSV / print
+
+- Row count in the footer
+
+  Shown only while a filter is actually hiding rows (`Showing 1 to 8 of 8 entries (filtered from 42
+  total entries)`). While every row is visible it says nothing useful, so it stays hidden.
 
 ### After filtering by "carnivore" and sorting by "Name"
 

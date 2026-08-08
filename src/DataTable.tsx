@@ -16,6 +16,7 @@ import 'datatables.net-searchpanes-bs5';
 import './DataTable.css';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 import { waitUntilReadyToInitialize } from './initScheduler';
+import { setupToolbar, toolbarButtons } from './toolbar';
 
 /*
  * 初期化済みのコンテナを覚えておく。
@@ -40,15 +41,19 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
      * - 全カラムのソート順序を "初期順序"(デフォルト) => "昇順" => "降順" に設定
      * - ページネーションを無効化
      * - テーブルを縦スクロール化(縦幅は 500px)
-     * - 拡張機能のボタンを表示(ボタンは以下)
-     *   - "Column visibility" ボタン: カラムの表示・非表示をトグル
-     *   - "SearchPanels" ボタン: カラム毎のフィルタ（テキストフィルタ、選択フィルタ）
-     *   - "Copy": テーブルのコピー
-     *   - "CSV": テーブルを CSV 形式でダウンロード
-     *   - "Print": テーブルを印刷
+     * - 拡張機能のボタンをアイコンとして表示(ボタンは以下)
+     *   - "Search" ボタン: 検索欄をその場に開閉 (詳細は toolbar.ts)
+     *   - "Columns" ボタン: カラムの表示・非表示をトグル
+     *   - "Filters" ボタン: カラム毎のフィルタ（テキストフィルタ、選択フィルタ）
+     *   - "Export" ボタン: コピー / CSV ダウンロード / 印刷をまとめたドロップダウン
+     *
+     * dom の l (件数選択) と p (ページャ) は paging: false では何も描かないので並べていない。
+     * 検索欄 (f) と件数表示 (i) は常時は畳んでおき、CSS で必要なときだけ見せる。
      */
     const dataTableOptions = {
-      dom: '<"mb-3"<"container-fluid"<"d-flex justify-content-between"fB>>>t<"text-muted"i>lp>',
+      dom: '<"mb-3"<"gpdt-toolbar"fB>t<"gpdt-info text-muted"i>>',
+      // ラベルの "Search:" はアイコンが担うので消し、代わりに入力欄へプレースホルダを置く
+      language: { search: '', searchPlaceholder: 'Search' },
       columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], searchPanes: { show: true }, targets: '_all' }],
       /*
        * 初期ソートはしない。
@@ -63,7 +68,7 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       scrollCollapse: true,
       scrollY: '500px',
       select: true,
-      buttons: ['colvis', 'searchPanes', 'spacer', 'copyHtml5', 'spacer', 'csvHtml5', 'spacer', 'print'],
+      buttons: toolbarButtons,
     };
 
     // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
@@ -83,6 +88,8 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       initializedContainers.add(container);
 
       const api = new DataTable(tableElement, dataTableOptions as ConfigWeaken);
+
+      setupToolbar(api);
 
       /*
        * ソート順序を "初期順序" => "昇順" => "降順" => ... と巡回させるための処理。

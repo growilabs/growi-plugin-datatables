@@ -1,6 +1,15 @@
 # tests
 
-Playwright によるブラウザ計測。現状は `perf/` の描画性能計測のみ。
+Playwright によるブラウザ計測とテスト。
+
+| ディレクトリ | 内容 |
+| --- | --- |
+| `perf/` | 描画性能の計測と、挙動の固定 (characterization) |
+| `calc/` | 独自の計算記法 (`{vsum}` など) の回帰テスト |
+| `ui/` | ツールバーの出し分けの回帰テスト |
+
+`yarn test:perf` は testDir (`tests/`) 配下を全て走らせる。
+`perf/` 以外も含まれるので、名前に反して「Playwright のテスト全部」だと思ってよい。
 
 ## セットアップ
 
