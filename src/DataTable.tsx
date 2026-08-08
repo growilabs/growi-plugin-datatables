@@ -1,8 +1,7 @@
 import { type FunctionComponent } from 'react';
 import Async from 'react-async';
 
-import DataTable, { type Api as DataTableApi } from 'datatables.net-bs5';
-import { v4 as uuidv4 } from 'uuid';
+import DataTable from 'datatables.net-bs5';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
@@ -15,13 +14,25 @@ import 'datatables.net-select-bs5';
 import 'datatables.net-searchpanes-bs5';
 
 import './DataTable.css';
-import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
+import { waitUntilReadyToInitialize } from './initScheduler';
+
+/*
+ * 初期化済みのコンテナを覚えておく。
+ * このコンポーネントは再レンダーのたびに enableDataTable が再実行されるため
+ * (react-async は promiseFn の identity が変わると再実行する)、多重初期化を防ぐ必要がある。
+ *
+ * 「table 要素が DataTables 登録済みか」だけでは判定できない点に注意。
+ * scrollY を有効にした DataTables は table を dt-scroll-head / dt-scroll-body に作り変え、
+ * ヘッダ側に複製の table を作る。その複製はコンテナ内で最初に見つかる table でありながら
+ * DataTables には未登録なので、複製を掴んで初期化し直してしまう。
+ */
+const initializedContainers = new WeakSet<Element>();
 
 export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<any> => {
   return ({ children, ...props }) => {
-    const containerId = uuidv4();
-    const dtSelector = `#${containerId} table`;
+    let container: HTMLElement | null = null;
+
     /*
      * DataTable の設定
      * - DataTable 全体を div で括って class "mb-3" を付与
@@ -39,7 +50,15 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
     const dataTableOptions = {
       dom: '<"mb-3"<"container-fluid"<"d-flex justify-content-between"fB>>>t<"text-muted"i>lp>',
       columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], searchPanes: { show: true }, targets: '_all' }],
-      order: [[0, 'pre']],
+      /*
+       * 初期ソートはしない。
+       * かつて order: [[0, 'pre']] を指定していたが、'pre' は DataTables にとって不正な方向指定で、
+       * extSort['natural-pre'] が引けずに汎用比較の降順へフォールバックしていた。
+       * その結果「初期化時に意図しない降順ソートが走り、直後に neutral().draw() で打ち消す」
+       * という無駄な往復が発生していた (これが issue#9 の原因)。
+       * order: [] なら _fnSort が読み込み順をそのまま使うため、打ち消しの再描画も不要になる。
+       */
+      order: [],
       paging: false,
       scrollCollapse: true,
       scrollY: '500px',
@@ -47,40 +66,29 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       buttons: ['colvis', 'searchPanes', 'spacer', 'copyHtml5', 'spacer', 'csvHtml5', 'spacer', 'print'],
     };
 
-    const getReplaceCellPositions = (api: DataTableApi<any>): Array<{ row: number; column: number; methodType: MethodType }> => {
-      const replaceCellPositions = [];
-      const data = api.data().toArray();
-      for (let row = 0; row < data.length; row++) {
-        for (let column = 0; column < data[row].length; column++) {
-          const value = data[row][column].trim();
-          if (MethodTypes.includes(value)) {
-            replaceCellPositions.push({ row, column, methodType: value });
-          }
-        }
-      }
-
-      return replaceCellPositions;
-    };
-
-    const handleCalcMethod = (api: DataTableApi<any>): Array<{ row: number; column: number; calcResult?: number }> => {
-      const calcData = getReplaceCellPositions(api);
-      const calculatedData: Array<{ row: number; column: number; calcResult?: number }> = [];
-      calcData.forEach(({ row, column, methodType }) => {
-        const calcResult = CalcMethod[methodType](api, { row, column });
-        calculatedData.push({ row, column, calcResult });
-      });
-
-      return calculatedData;
-    };
-
     // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
     // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
     // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
     const enableDataTable = async () => {
-      if (DataTable.isDataTable(dtSelector)) return;
+      if (container == null || initializedContainers.has(container)) return;
 
-      const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
+      const tableElement = container.querySelector('table');
+      if (tableElement == null || DataTable.isDataTable(tableElement)) return;
 
+      // 画面外のテーブルはここで止まる。初期化のコストは表示されるまで発生しない。
+      await waitUntilReadyToInitialize(container);
+
+      // 待っている間に別の実行 (再レンダー由来) が初期化を終えている可能性がある
+      if (initializedContainers.has(container)) return;
+      initializedContainers.add(container);
+
+      const api = new DataTable(tableElement, dataTableOptions as ConfigWeaken);
+
+      /*
+       * ソート順序を "初期順序" => "昇順" => "降順" => ... と巡回させるための処理。
+       * orderSequence の 'pre' は DataTables が解釈できる値ではないので、
+       * ヘッダクリックで 'pre' に遷移してきたところを捕まえて読み込み順に戻している。
+       */
       api.on('order.dt', () => {
         const order = api.order();
         if (order.length <= 0) return;
@@ -90,20 +98,17 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
 
         (api.order as any).neutral().draw();
       });
-
-      // 計算処理と計算結果の置き換え処理は分ける (置き換えられる計算結果を考慮しない)
-      const calculatedData = handleCalcMethod(api);
-      calculatedData.forEach(({ row, column, calcResult }) => {
-        api.cell({ row, column }).data(calcResult);
-      });
-
-      // どこかでソート順序が変わるので明示的に元の順序を設定する(issue#9)
-      (api.order as any).neutral().draw();
     };
 
     return (
       <Async promiseFn={enableDataTable}>
-        <div id={containerId} className="position-relative">
+        {/*
+          * ref で DOM ノードを直接掴む。
+          * 以前は uuid を採番して id セレクタで引いていたが、その uuid はレンダーごとに
+          * 採番し直されるため、初期化を遅延させるとセレクタが指す先が変わってしまう。
+          * 再レンダー時に null で呼ばれるぶんは無視して、掴んだノードを保持し続ける。
+          */}
+        <div ref={(el) => { if (el != null) container = el; }} className="position-relative">
           <Table {...props}>{children}</Table>
         </div>
       </Async>

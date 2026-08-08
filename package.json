@@ -22,7 +22,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "yarn eslint --quiet \"src/**/*.{ts,tsx}\"",
-    "lint:format": "yarn lint --fix"
+    "lint:format": "yarn lint --fix",
+    "test:perf": "playwright test",
+    "test:perf:report": "playwright show-report"
   },
   "dependencies": {
     "datatables.net-bs5": "^2.0.3",
@@ -40,6 +42,8 @@
   "devDependencies": {
     "@babel/core": "^7.23.7",
     "@babel/eslint-parser": "^7.23.3",
+    "@playwright/test": "1.58.2",
+    "@types/node": "^20",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/uuid": "^9.0.7",
@@ -58,7 +62,10 @@
     "eslint-plugin-regex": "^1.10.0",
     "eslint-plugin-vue": "^7.15.0",
     "prettier": "^3.1.1",
+    "rehype-parse": "^9.0.1",
+    "rehype-react": "^8.0.0",
     "typescript": "^4.6.4",
+    "unist-util-visit": "^5.0.0",
     "vite": "^3.1.0"
   },
   "growiPlugin": {

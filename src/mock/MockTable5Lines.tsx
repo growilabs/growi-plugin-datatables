@@ -1,10 +1,14 @@
-import React from 'react';
-
+import rehypeReact from 'rehype-react';
+import React, { Fragment } from 'react';
+import * as prod from 'react/jsx-runtime';
+import rehypeParse from 'rehype-parse';
+import { unified } from 'unified';
 import ReactDOM from 'react-dom/client';
 
+import { calcTable } from '../CalcTable';
 import { wrapDataTable } from '../DataTable';
 
-const tableHTML = (
+const tableHTML = `
   <table className="table table-bordered">
     <thead>
       <tr>
@@ -41,8 +45,13 @@ const tableHTML = (
       </tr>
     </tbody>
   </table>
-);
-const DataTables = wrapDataTable(() => tableHTML);
+`;
+const processor = unified().use(rehypeParse, { fragment: true }).use(calcTable).use(rehypeReact, {
+  Fragment: prod.Fragment,
+  jsx: prod.jsx,
+  jsxs: prod.jsxs,
+});
+const DataTables = wrapDataTable(() => processor.processSync(tableHTML).result);
 
 ReactDOM.createRoot(document.getElementById('MockTable5Lines') as HTMLElement).render(
   <React.StrictMode>

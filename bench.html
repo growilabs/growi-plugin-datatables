@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>growi-plugin-datatables - benchmark</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+      integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+      crossorigin="anonymous"
+    />
+    <script>
+      /*
+       * 計測用の instrumentation。
+       * ES module (bench.tsx) より先に実行される必要があるため、インライン script で仕込む。
+       * - String.prototype.localeCompare の呼び出し回数
+       *   ("natural" ソートが実際に走ったかを判定するため)
+       * - longtask の合計時間 (メインスレッドのブロック時間)
+       */
+      window.__bench = {
+        counters: {
+          localeCompare: 0,
+          preInit: 0,
+          init: 0,
+          draw: 0,
+          order: 0,
+        },
+        marks: {},
+        longTasks: [],
+        ready: false,
+      };
+
+      const originalLocaleCompare = String.prototype.localeCompare;
+      // eslint-disable-next-line no-extend-native
+      String.prototype.localeCompare = function (...args) {
+        window.__bench.counters.localeCompare += 1;
+        return originalLocaleCompare.apply(this, args);
+      };
+
+      if (typeof PerformanceObserver !== 'undefined') {
+        try {
+          new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+              window.__bench.longTasks.push({ start: entry.startTime, duration: entry.duration });
+            }
+          }).observe({ entryTypes: ['longtask'] });
+        }
+        catch (e) {
+          /* longtask 非対応環境では単に収集しない */
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="bench-root"></div>
+    <script type="module" src="/src/bench/bench.tsx"></script>
+  </body>
+</html>
