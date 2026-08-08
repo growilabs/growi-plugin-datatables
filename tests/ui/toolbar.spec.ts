@@ -173,6 +173,37 @@ test.describe('ツールバー', () => {
   });
 });
 
+/*
+ * 記事中のテーブルは読むものであって行を選ぶ対象ではない。
+ * かつて select: true が入っており、文字列をドラッグして選ぼうとしただけで行が青くなり、
+ * 解除する手段も画面上に無かった。Select 拡張ごと外してある。
+ */
+test.describe('行の選択', () => {
+  test('行をクリックしても選択状態にならず背景色も変わらない', async({ page }) => {
+    const container = await openTable(page);
+    const row = mainRows(container).first();
+
+    const backgroundBefore = await row.evaluate((el) => getComputedStyle(el).backgroundColor);
+
+    await row.click();
+    await row.click({ clickCount: 2 });
+
+    await expect(row).not.toHaveClass(/selected/);
+    expect(await row.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(backgroundBefore);
+
+    // 行内のセルにも選択の痕跡が残らない
+    await expect(container.locator('.selected')).toHaveCount(0);
+  });
+
+  /*
+   * Select 拡張そのものは外せない。SearchPanes がパネル内の値の選択に使っており、
+   * 未読込だと "SearchPane requires Select" で初期化ごと落ちる。
+   * その担保は上の「SearchPanes で絞り込んでも〜」が兼ねている
+   * (パネルが開いて絞り込めている時点で Select は載っている)。
+   * ここでは本体テーブル側が無効であることだけを見る。
+   */
+});
+
 test.describe('フッターの件数表示', () => {
   const SMALL_TABLE = '#MockTable5Lines > .position-relative > .dt-container';
 

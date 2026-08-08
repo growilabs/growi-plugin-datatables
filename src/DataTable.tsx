@@ -10,6 +10,11 @@ import 'datatables.net-buttons/js/dataTables.buttons';
 import 'datatables.net-buttons/js/buttons.colVis';
 import 'datatables.net-buttons/js/buttons.html5';
 import 'datatables.net-buttons/js/buttons.print';
+/*
+ * Select は本体テーブルでは使わない (select: false) が、外すことはできない。
+ * SearchPanes がパネル内の値の選択に使っており、未読込だと
+ * "SearchPane requires Select" で初期化ごと落ちる。
+ */
 import 'datatables.net-select-bs5';
 import 'datatables.net-searchpanes-bs5';
 
@@ -66,7 +71,17 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       paging: false,
       scrollCollapse: true,
       scrollY: '500px',
-      select: true,
+      /*
+       * 行の選択はしない。
+       *
+       * かつて select: true を入れていたが、記事中のテーブルは読むものであって
+       * 行を選ぶ対象ではない。文字列をドラッグして選ぼうとしただけで行が青くなり、
+       * しかも選択を解除する手段が画面上に無い、という状態になっていた。
+       *
+       * Select 拡張自体は SearchPanes が要求するので読み込んだままにする。
+       * ここで無効にしておけば本体の行に selected クラスが付かないので、背景色も出ない。
+       */
+      select: false,
       buttons: toolbarButtons,
     };
 

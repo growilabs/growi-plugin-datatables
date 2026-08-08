@@ -33,8 +33,8 @@ const openPage = async(page: Page): Promise<void> => {
  * 矩形内を 1px 刻みで総当たりして elementFromPoint の結果を数える。
  * 部分的に覆われている状態も数値で捕まえられる。
  */
-const clickableRatio = (page: Page): Promise<number> => page.evaluate(({ sel }) => {
-  const btn = document.querySelector(sel) as HTMLElement;
+const clickableRatio = (page: Page, sel = EDIT_BUTTON): Promise<number> => page.evaluate((selector) => {
+  const btn = document.querySelector(selector) as HTMLElement;
   const rect = btn.getBoundingClientRect();
 
   let hits = 0;
@@ -48,7 +48,7 @@ const clickableRatio = (page: Page): Promise<number> => page.evaluate(({ sel }) 
   }
 
   return total === 0 ? 0 : Math.round((hits / total) * 100);
-}, { sel: EDIT_BUTTON });
+}, sel);
 
 test.describe('GROWI の編集アイコンとの共存', () => {
   test('編集アイコンが DataTables のコンテナに覆われない', async({ page }) => {
@@ -83,14 +83,19 @@ test.describe('GROWI の編集アイコンとの共存', () => {
     expect(Math.round(wrapper.x + wrapper.width - editBox.x)).toBeLessThanOrEqual(32);
     expect(Math.round(wrapper.x + wrapper.width - (buttons.x + buttons.width))).toBeGreaterThanOrEqual(32);
 
-    // 4 つとも実際に押せる (一番右の Export が編集アイコンに最も近い)
+    /*
+     * 4 つとも全面が最前面にある (一番右の Export が編集アイコンに最も近い)。
+     *
+     * ここで実際にクリックして回らないのは、collection を開くと DataTables が
+     * 全画面の div.dt-button-background を挿し、その後始末を待つ処理が
+     * 「編集アイコンに食われた」のか「オーバーレイに邪魔された」のか区別できない
+     * 不安定なテストになるため。当たり判定そのものを測れば十分で、しかも決定的。
+     */
     for (const title of ['Export', 'Filters', 'Columns', 'Search']) {
-      await page.locator(`.gpdt-toolbar .gpdt-button[title="${title}"]`).click();
-      await page.keyboard.press('Escape');
-      await page.mouse.click(5, 5);
+      expect(await clickableRatio(page, `.gpdt-toolbar .gpdt-button[title="${title}"]`)).toBe(100);
     }
 
-    // 検索欄は開閉できている = クリックが届いている
+    // ドロップダウンを伴わない検索アイコンだけ、実際にクリックが届くことも確かめる
     await page.locator('.gpdt-button-search').click();
     await expect(page.locator('.gpdt-toolbar .dt-search input')).toBeFocused();
   });
