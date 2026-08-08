@@ -2,7 +2,7 @@ import { Element, Parent } from 'hast';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
 
-import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
+import { type CalcResult, type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 
 function extractBody(table: Element): TableData {
   const tableData: TableData = [];
@@ -39,8 +39,8 @@ function getReplaceCellPositions(data: TableData): Array<{ row: number; column: 
 function handleCalcMethod(
     data: TableData,
     calcData: Array<{ row: number; column: number; methodType: MethodType }>,
-): Array<{ row: number; column: number; calcResult?: number }> {
-  const calculatedData: Array<{ row: number; column: number; calcResult?: number }> = [];
+): Array<{ row: number; column: number; calcResult: CalcResult }> {
+  const calculatedData: Array<{ row: number; column: number; calcResult: CalcResult }> = [];
   calcData.forEach(({ row, column, methodType }) => {
     const calcResult = CalcMethod[methodType](data, { row, column });
     calculatedData.push({ row, column, calcResult });
@@ -49,7 +49,7 @@ function handleCalcMethod(
   return calculatedData;
 }
 
-function replaceCalculatedData(table: Element, calculatedData: Array<{ row: number; column: number; calcResult?: number }>) {
+function replaceCalculatedData(table: Element, calculatedData: Array<{ row: number; column: number; calcResult: CalcResult }>) {
   let row = 0;
   let col = 0;
 
