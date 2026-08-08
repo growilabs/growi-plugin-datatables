@@ -1,7 +1,7 @@
 import { type FunctionComponent } from 'react';
 import Async from 'react-async';
 
-import DataTable from 'datatables.net-bs5';
+import DataTable, { type Api } from 'datatables.net-bs5';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
@@ -23,18 +23,49 @@ import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 import { waitUntilReadyToInitialize } from './initScheduler';
 import { setupToolbar, toolbarButtons, toolbarLanguage } from './toolbar';
 
-/*
- * 初期化済みのコンテナを覚えておく。
- * このコンポーネントは再レンダーのたびに enableDataTable が再実行されるため
- * (react-async は promiseFn の identity が変わると再実行する)、多重初期化を防ぐ必要がある。
+/**
+ * display: none などで表示から外れているか。
  *
+ * offsetParent では position: fixed の祖先を持つ場合に誤判定するので、
+ * ボックスが生成されているかどうかで見る。
+ */
+const isHidden = (el: HTMLElement): boolean => el.getClientRects().length === 0;
+
+type ContainerState = {
+  /** 初期化済みの API。解除するときに使う */
+  api: Api<any> | null;
+  /** 初期化の実行中かどうか。待っている間に非表示になった場合の取り消しに使う */
+  initializing: boolean;
+  /** 直前に観測した表示状態。ResizeObserver の通知を変化点だけに絞るために持つ */
+  hidden: boolean;
+};
+
+/*
+ * コンテナごとの状態。
+ *
+ * このコンポーネントは再レンダーのたびに関数がまるごと作り直されるので、
+ * 状態をレンダーのクロージャに置くと再レンダーの前後でつながらない。
+ * 特に ref はインライン関数なので毎レンダー呼び直され、
+ * クロージャ側の「初期化済み」フラグは毎回 false に戻ってしまう。
+ * (この作りのせいで、編集モードの往復 2 回目以降で解除が効かない不具合を出した)
+ * DOM ノードそのものを鍵にして、レンダーをまたいで残す。
+ *
+ * 多重初期化を防ぐ役目も兼ねる。
  * 「table 要素が DataTables 登録済みか」だけでは判定できない点に注意。
  * 初期化は waitUntilReadyToInitialize を挟んで非同期に進むので、
  * 先行した実行がまだ new DataTable() に到達していない間に後続の実行が
  * isDataTable のチェックを通り抜けてしまう。
- * 待ちに入る前にコンテナを登録しておくことでこの窓を塞ぐ。
  */
-const initializedContainers = new WeakSet<Element>();
+const containerStates = new WeakMap<HTMLElement, ContainerState>();
+
+const stateOf = (el: HTMLElement): ContainerState => {
+  const found = containerStates.get(el);
+  if (found != null) return found;
+
+  const created: ContainerState = { api: null, initializing: false, hidden: isHidden(el) };
+  containerStates.set(el, created);
+  return created;
+};
 
 export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<any> => {
   return ({ children, ...props }) => {
@@ -99,22 +130,7 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       buttons: toolbarButtons,
     };
 
-    // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
-    // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
-    // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
-    const enableDataTable = async () => {
-      if (container == null || initializedContainers.has(container)) return;
-
-      const tableElement = container.querySelector('table');
-      if (tableElement == null || DataTable.isDataTable(tableElement)) return;
-
-      // 画面外のテーブルはここで止まる。初期化のコストは表示されるまで発生しない。
-      await waitUntilReadyToInitialize(container);
-
-      // 待っている間に別の実行 (再レンダー由来) が初期化を終えている可能性がある
-      if (initializedContainers.has(container)) return;
-      initializedContainers.add(container);
-
+    const applyDataTable = (tableElement: HTMLTableElement) => {
       const api = new DataTable(tableElement, dataTableOptions as ConfigWeaken);
 
       setupToolbar(api);
@@ -133,6 +149,98 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
 
         (api.order as any).neutral().draw();
       });
+
+      return api;
+    };
+
+    // [MEMO] useEffect を使うと ReactCurrentDispatcher が null になる
+    // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
+    // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
+    const enableDataTable = async () => {
+      if (container == null) return;
+
+      const el = container;
+      const state = stateOf(el);
+      if (state.api != null || state.initializing) return;
+
+      const tableElement = el.querySelector('table');
+      if (tableElement == null || DataTable.isDataTable(tableElement)) return;
+
+      state.initializing = true;
+      try {
+        // 画面外のテーブルはここで止まる。初期化のコストは表示されるまで発生しない。
+        await waitUntilReadyToInitialize(el);
+
+        // 待っている間に別の実行 (再レンダー由来) が初期化を終えている可能性がある
+        if (state.api != null) return;
+
+        // 待っている間に編集画面へ遷移して非表示になっているかもしれない。
+        // ここで初期化してしまうと、隠れている間に DOM を作り変えたままになる。
+        if (isHidden(el)) return;
+
+        state.api = applyDataTable(tableElement);
+      }
+      finally {
+        state.initializing = false;
+      }
+    };
+
+    /*
+     * 非表示になったら DataTables を解除して DOM を React に返す。
+     *
+     * GROWI は編集画面へ遷移すると view 側を display: none で隠すだけで、
+     * React のツリーはマウントしたまま残す (LazyRenderer)。
+     * その間に GROWI の TableWithEditButton は編集ボタンの表示条件を切り替えるので、
+     * React は「table の直前にボタンを挿す」を実行する。
+     * ところが DataTables は table を自前の div.dt-container へ移してしまっているため、
+     * table はもう親の子ではなく insertBefore が失敗する
+     * (Node.insertBefore: Child to insert before is not a child of this node)。
+     *
+     * destroy() すれば table は元の位置に戻るので、React の認識と実 DOM が一致する。
+     * 表示に戻ったら初期化し直す。
+     */
+    const releaseDataTable = () => {
+      if (container == null) return;
+
+      const state = stateOf(container);
+      if (state.api == null) return;
+
+      state.api.destroy();
+      state.api = null;
+    };
+
+    /*
+     * 表示・非表示の検出には ResizeObserver を使う。
+     *
+     * スクロールで画面外に出ただけの要素はサイズが変わらないので反応しない。
+     * display: none で隠されたときだけ 0x0 になる。
+     * IntersectionObserver だとスクロールのたびに反応してしまい、
+     * 解除と再初期化を往復させることになる。
+     */
+    const observeVisibility = (el: HTMLElement) => {
+      if (typeof ResizeObserver === 'undefined') return;
+
+      const state = stateOf(el);
+
+      new ResizeObserver(() => {
+        // observe() の直後にも今のサイズで一度呼ばれるので、変化点だけを拾う
+        const hidden = isHidden(el);
+        if (hidden === state.hidden) return;
+        state.hidden = hidden;
+
+        /*
+         * ResizeObserver のコールバックの中で DOM を作り変えると
+         * "ResizeObserver loop completed with undelivered notifications" になる。
+         * 一段遅らせて、レイアウトの計算が終わってから触る。
+         */
+        queueMicrotask(() => {
+          if (hidden) {
+            releaseDataTable();
+            return;
+          }
+          enableDataTable();
+        });
+      }).observe(el);
     };
 
     return (
@@ -142,8 +250,22 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
           * 以前は uuid を採番して id セレクタで引いていたが、その uuid はレンダーごとに
           * 採番し直されるため、初期化を遅延させるとセレクタが指す先が変わってしまう。
           * 再レンダー時に null で呼ばれるぶんは無視して、掴んだノードを保持し続ける。
+          *
+          * インライン関数の ref は再レンダーのたびに呼び直される。
+          * 監視を張るのは初回だけでよいので、状態を見て一度きりにする。
           */}
-        <div ref={(el) => { if (el != null) container = el; }} className="position-relative">
+        <div
+          ref={(el) => {
+            if (el == null) return;
+
+            container = el;
+
+            if (containerStates.has(el)) return;
+            stateOf(el);
+            observeVisibility(el);
+          }}
+          className="position-relative"
+        >
           <Table {...props}>{children}</Table>
         </div>
       </Async>
