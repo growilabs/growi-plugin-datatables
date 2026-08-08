@@ -17,7 +17,6 @@ import rehypeParse from 'rehype-parse';
 import rehypeReact from 'rehype-react';
 import { unified } from 'unified';
 
-import DataTable from 'datatables.net-bs5';
 import $ from 'jquery';
 
 import { calcTable } from '../CalcTable';
@@ -92,19 +91,6 @@ const tableHtml = buildTableHtml(ROWS, COLS);
  * jQuery イベントは document までバブリングするため、document で受ける
  * (SearchPanes 自身が preInit.dt をこの方式でフックしているのと同じ手口)。
  */
-/*
- * enableDataTable が何回呼ばれたかを、ソースを書き換えずに数えるための細工。
- * DataTable.tsx の enableDataTable は必ず先頭で DataTable.isDataTable() を1回呼ぶので、
- * その呼び出し回数を enableDataTable の実行回数とみなせる。
- * (vite は ESM を解決パス単位で dedupe するため、ここで掴む DataTable は
- *  DataTable.tsx が import しているものと同一インスタンス)
- */
-const originalIsDataTable = DataTable.isDataTable;
-(DataTable as any).isDataTable = (...args: any[]) => {
-  bench.counters.enableDataTable += 1;
-  return (originalIsDataTable as any).apply(DataTable, args);
-};
-
 $(document).on('preInit.dt', (e) => {
   bench.counters.preInit += 1;
 
@@ -124,9 +110,10 @@ $(document).on('draw.dt', () => {
 });
 $(document).on('init.dt', () => {
   bench.counters.init += 1;
+  bench.marks.lastInit = performance.now();
 
-  if (bench.counters.init === TABLES && bench.marks.allTablesInitialized == null) {
-    bench.marks.allTablesInitialized = performance.now();
+  if (bench.marks.firstInit == null) {
+    bench.marks.firstInit = performance.now();
   }
 });
 
@@ -180,19 +167,31 @@ root.render(STRICT ? (
   <Bench />
 ));
 
-// Playwright 側が「描画が一段落した」ことを検知するためのフラグ。
-// 全テーブルの init.dt を受け取ったうえで、メインスレッドが空くまで待ってから立てる。
+/*
+ * Playwright 側が「描画が一段落した」ことを検知するためのフラグ。
+ *
+ * 遅延初期化により、画面外のテーブルは初期化されないまま留まる。
+ * したがって「全テーブルの init.dt が揃うまで待つ」わけにはいかない。
+ * 代わりに「init.dt が一定時間途切れたら落ち着いたとみなす」方式にする。
+ */
+const QUIESCENT_MS = 250;
+
 const markReady = () => {
-  if (bench.counters.init < TABLES) {
+  const now = performance.now();
+  const { lastInit } = bench.marks;
+
+  // 1件も初期化されないまま時間が経った場合も、そこで打ち切って ready にする
+  // (viewport にテーブルが1つも入っていないケース)
+  const nothingHappenedYet = lastInit == null && now - bench.marks.renderStart < QUIESCENT_MS * 4;
+  const stillInitializing = lastInit != null && now - lastInit < QUIESCENT_MS;
+
+  if (nothingHappenedYet || stillInitializing) {
     window.setTimeout(markReady, 25);
     return;
   }
-  requestAnimationFrame(() => {
-    window.setTimeout(() => {
-      bench.marks.ready = performance.now();
-      bench.ready = true;
-    }, 0);
-  });
+
+  bench.marks.ready = performance.now();
+  bench.ready = true;
 };
 markReady();
 

@@ -2,7 +2,6 @@ import { type FunctionComponent } from 'react';
 import Async from 'react-async';
 
 import DataTable from 'datatables.net-bs5';
-import { v4 as uuidv4 } from 'uuid';
 
 import 'datatables.net-plugins/api/order.neutral().mjs';
 import 'datatables.net-plugins/sorting/natural.mjs';
@@ -16,11 +15,24 @@ import 'datatables.net-searchpanes-bs5';
 
 import './DataTable.css';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
+import { waitUntilReadyToInitialize } from './initScheduler';
+
+/*
+ * 初期化済みのコンテナを覚えておく。
+ * このコンポーネントは再レンダーのたびに enableDataTable が再実行されるため
+ * (react-async は promiseFn の identity が変わると再実行する)、多重初期化を防ぐ必要がある。
+ *
+ * 「table 要素が DataTables 登録済みか」だけでは判定できない点に注意。
+ * scrollY を有効にした DataTables は table を dt-scroll-head / dt-scroll-body に作り変え、
+ * ヘッダ側に複製の table を作る。その複製はコンテナ内で最初に見つかる table でありながら
+ * DataTables には未登録なので、複製を掴んで初期化し直してしまう。
+ */
+const initializedContainers = new WeakSet<Element>();
 
 export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<any> => {
   return ({ children, ...props }) => {
-    const containerId = uuidv4();
-    const dtSelector = `#${containerId} table`;
+    let container: HTMLElement | null = null;
+
     /*
      * DataTable の設定
      * - DataTable 全体を div で括って class "mb-3" を付与
@@ -58,9 +70,19 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
     // (おそらく plugin が読み込む react インスタンスが app(GROWI) と異なるため)
     // そこで、async-react を使って、plugin を有効化するためのイベント処理を行っている
     const enableDataTable = async () => {
-      if (DataTable.isDataTable(dtSelector)) return;
+      if (container == null || initializedContainers.has(container)) return;
 
-      const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
+      const tableElement = container.querySelector('table');
+      if (tableElement == null || DataTable.isDataTable(tableElement)) return;
+
+      // 画面外のテーブルはここで止まる。初期化のコストは表示されるまで発生しない。
+      await waitUntilReadyToInitialize(container);
+
+      // 待っている間に別の実行 (再レンダー由来) が初期化を終えている可能性がある
+      if (initializedContainers.has(container)) return;
+      initializedContainers.add(container);
+
+      const api = new DataTable(tableElement, dataTableOptions as ConfigWeaken);
 
       /*
        * ソート順序を "初期順序" => "昇順" => "降順" => ... と巡回させるための処理。
@@ -80,7 +102,13 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
 
     return (
       <Async promiseFn={enableDataTable}>
-        <div id={containerId} className="position-relative">
+        {/*
+          * ref で DOM ノードを直接掴む。
+          * 以前は uuid を採番して id セレクタで引いていたが、その uuid はレンダーごとに
+          * 採番し直されるため、初期化を遅延させるとセレクタが指す先が変わってしまう。
+          * 再レンダー時に null で呼ばれるぶんは無視して、掴んだノードを保持し続ける。
+          */}
+        <div ref={(el) => { if (el != null) container = el; }} className="position-relative">
           <Table {...props}>{children}</Table>
         </div>
       </Async>

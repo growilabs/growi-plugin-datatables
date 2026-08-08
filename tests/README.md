@@ -70,9 +70,11 @@ yarn test:perf --grep スケーリング    # 絞り込み
   内部で `trigger` ではなく `triggerHandler` が使われるため。
   そのため `preInit.dt` (これはバブリングする) の時点で table 要素に直接ぶら下げている。
   `draw.dt` / `init.dt` / `preInit.dt` は document で拾える。
-- **`enableDataTable` の呼び出し回数は `DataTable.isDataTable` をラップして数えている。**
-  `src/DataTable.tsx` を計測用に書き換えたくないため。
-  `enableDataTable` は必ず先頭で `isDataTable()` を1回呼ぶので代理指標になる。
+- **「初期化が終わった」の判定は件数ではなく静穏時間で行っている。**
+  遅延初期化により画面外のテーブルは初期化されないままなので、
+  「全テーブルの `init.dt` が揃うまで待つ」方式は使えない。
+  `init.dt` が 250ms 途切れたら落ち着いたとみなしている。
+  そのため `readyMs` には常に約 250ms の検出待ちが含まれる。**改善の比較には `initMs` を使うこと。**
 - **DataTables 2 のソートは同期的に完了しない。**
   ヘッダを click した直後にカウンタを読んでも反映されていないので、
   `draw.dt` が届くまで待つこと (`measureSortClick` はそうしている)。

@@ -17,9 +17,22 @@ export type BenchMetrics = {
    * 相対比較にのみ使うこと。
    */
   moduleLoadMs: number;
-  /** render 開始から全テーブルの init.dt を受け取るまで */
+  /**
+   * render 開始から最後の init.dt まで。
+   * 遅延初期化により「初期化されたぶんだけ」の時間である点に注意
+   * (画面外のテーブルは初期化されないので含まれない)。
+   * 実際に初期化された数は initializedTables を見ること。
+   */
   initMs: number;
-  /** render 開始から描画が一段落するまで */
+  /** render 開始から最初の init.dt まで。最初のテーブルが操作可能になるまでの時間。 */
+  firstInitMs: number;
+  /** 実際に初期化されたテーブル数 */
+  initializedTables: number;
+  /**
+   * render 開始から描画が一段落したと判定するまで。
+   * 判定は「init.dt が QUIESCENT_MS (250ms) 途切れたら落ち着いた」という方式なので、
+   * この値には常に約 250ms の検出待ちが含まれる。改善の比較には initMs を使うこと。
+   */
   readyMs: number;
   /** メインスレッドがブロックされていた合計時間 (longtask の合計) */
   longTaskMs: number;
@@ -31,7 +44,6 @@ export type BenchMetrics = {
     init: number;
     draw: number;
     order: number;
-    enableDataTable: number;
   };
 };
 
@@ -74,7 +86,9 @@ export const measure = async (page: Page, params: BenchParams): Promise<BenchMet
       params: b.params,
       // performance.now() の原点はナビゲーション開始なので、renderStart がそのままロード時間になる
       moduleLoadMs: renderStart,
-      initMs: b.marks.allTablesInitialized - renderStart,
+      initMs: b.marks.lastInit != null ? b.marks.lastInit - renderStart : 0,
+      firstInitMs: b.marks.firstInit != null ? b.marks.firstInit - renderStart : 0,
+      initializedTables: b.counters.init,
       readyMs: b.marks.ready - renderStart,
       longTaskMs,
       longestTaskMs,
@@ -129,6 +143,27 @@ export const measureSortClick = async (page: Page): Promise<{
       draws: b.counters.draw - snapshot.draw,
     };
   }, before);
+};
+
+/**
+ * ページを最後までスクロールし、遅延初期化されるテーブルを全て起こす。
+ * 「画面外のぶんが後から初期化されるか」を確かめるために使う。
+ */
+export const scrollThroughPage = async (page: Page): Promise<void> => {
+  await page.evaluate(async () => {
+    const step = window.innerHeight;
+    const height = document.body.scrollHeight;
+
+    for (let y = 0; y < height; y += step) {
+      window.scrollTo(0, y);
+      // IntersectionObserver のコールバックと初期化キューが回るのを待つ
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+
+  // 最後のぶんの初期化が落ち着くまで待つ
+  await page.waitForTimeout(500);
 };
 
 /** 表示されている 1 列目の値を先頭から数件読む (ソート順の確認用) */

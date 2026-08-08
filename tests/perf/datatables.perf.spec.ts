@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 
 import {
-  formatTable, measure, measureSortClick, readFirstColumn, type BenchMetrics,
+  formatTable, measure, measureSortClick, readFirstColumn, scrollThroughPage, type BenchMetrics,
 } from './measure';
 
 /*
@@ -39,17 +39,18 @@ test.describe('描画性能', () => {
 
       rows.push({
         tables,
+        '初期化された数': m.initializedTables,
+        'firstInit(ms)': m.firstInitMs.toFixed(1),
         'init(ms)': m.initMs.toFixed(1),
-        'ready(ms)': m.readyMs.toFixed(1),
         'longTask(ms)': m.longTaskMs.toFixed(1),
         'maxTask(ms)': m.longestTaskMs.toFixed(1),
         draw: m.counters.draw,
-        'draw/table': (m.counters.draw / tables).toFixed(1),
-        init: m.counters.init,
         localeCmp: m.counters.localeCompare,
       });
 
-      expect(m.counters.init, `${tables} 個すべてが初期化されること`).toBe(tables);
+      // 遅延初期化しているので、画面に入っていないぶんは初期化されない
+      expect(m.initializedTables, '初期化数がテーブル数を超えない').toBeLessThanOrEqual(tables);
+      expect(m.initializedTables, '少なくとも1つは初期化される').toBeGreaterThan(0);
     }
 
     console.log(`\n[perf] テーブル数スケーリング (50行 x 3列)\n${formatTable(rows)}\n`);
@@ -65,7 +66,6 @@ test.describe('描画性能', () => {
       rows.push({
         rows: rowCount,
         'init(ms)': m.initMs.toFixed(1),
-        'ready(ms)': m.readyMs.toFixed(1),
         'longTask(ms)': m.longTaskMs.toFixed(1),
         draw: m.counters.draw,
         localeCmp: m.counters.localeCompare,
@@ -128,8 +128,9 @@ test.describe('描画性能', () => {
       rows.push({
         case: `${c.tables}表 x ${c.rows}行 x ${c.cols}列`,
         'load(ms)': m.moduleLoadMs.toFixed(0),
+        '初期化数': m.initializedTables,
+        'firstInit(ms)': m.firstInitMs.toFixed(0),
         'init(ms)': m.initMs.toFixed(0),
-        'ready(ms)': m.readyMs.toFixed(0),
         'longTask(ms)': m.longTaskMs.toFixed(0),
       });
     }
@@ -139,40 +140,36 @@ test.describe('描画性能', () => {
     );
   });
 
-  test('再レンダーによる再初期化', async({ page }) => {
+  test('再レンダーしても再初期化されない', async({ page }) => {
     const baseline = await measure(page, { tables: 1, rows: 50 });
     const rerendered = await measure(page, { tables: 1, rows: 50, rerenders: 5 });
     collected.push(rerendered);
 
     console.log(
       `\n[perf] 再レンダーの影響 (1テーブル)\n${formatTable([
-        {
-          case: 'そのまま',
-          enableDataTable: baseline.counters.enableDataTable,
-          preInit: baseline.counters.preInit,
-          draw: baseline.counters.draw,
-        },
-        {
-          case: '5回再レンダー',
-          enableDataTable: rerendered.counters.enableDataTable,
-          preInit: rerendered.counters.preInit,
-          draw: rerendered.counters.draw,
-        },
+        { case: 'そのまま', preInit: baseline.counters.preInit, draw: baseline.counters.draw },
+        { case: '5回再レンダー', preInit: rerendered.counters.preInit, draw: rerendered.counters.draw },
       ])}\n`,
     );
 
-    // 再レンダーのたびに react-async が promiseFn (enableDataTable) を再実行する。
-    expect(
-      rerendered.counters.enableDataTable,
-      '再レンダーすると enableDataTable が再実行される',
-    ).toBeGreaterThan(baseline.counters.enableDataTable);
+    // react-async は promiseFn の identity が変わるたびに enableDataTable を再実行するが、
+    // 初期化済みコンテナの WeakSet で弾いているため DataTables の作り直しは起きない。
+    expect(rerendered.counters.preInit, '再初期化されない').toBe(baseline.counters.preInit);
+    expect(rerendered.counters.draw, '再描画されない').toBe(baseline.counters.draw);
+  });
 
-    // ただし enableDataTable 冒頭の isDataTable() ガードが効いているため、
-    // 実際の再初期化 (preInit) と再描画 (draw) までは起きていない。
-    // つまり再レンダーのコストは「無駄な非同期呼び出し1回」であって、
-    // DataTables の作り直しではない。
-    expect(rerendered.counters.preInit, '再初期化までは起きない').toBe(baseline.counters.preInit);
-    expect(rerendered.counters.draw, '再描画までは起きない').toBe(baseline.counters.draw);
+  test('画面外のテーブルはスクロールされるまで初期化されない', async({ page }) => {
+    const m = await measure(page, { tables: 10, rows: 50, cols: 3 });
+
+    // viewport (Desktop Chrome: 1280x720) にはテーブルが数個しか入らない
+    expect(m.initializedTables, '画面外のぶんは初期化されない').toBeLessThan(10);
+
+    await scrollThroughPage(page);
+
+    const after = await page.evaluate(() => (window as any).__bench.counters.init);
+    console.log(`\n[perf] 遅延初期化: 初期表示 ${m.initializedTables}/10 → スクロール後 ${after}/10\n`);
+
+    expect(after, 'スクロールすれば全て初期化される').toBe(10);
   });
 });
 
@@ -211,9 +208,8 @@ test.describe('現状の挙動の固定 (characterization)', () => {
   test('初期表示では natural ソートの比較関数が呼ばれない', async({ page }) => {
     const m = await measure(page, { tables: 1, rows: 200 });
 
-    // order: [[0,'pre']] の 'pre' は DataTables にとって不正な方向指定で、
-    // extSort['natural-pre'] が undefined になるため汎用比較にフォールバックする。
-    // つまり localeCompare を使う natural ソートは初期表示では走らない。
+    // order: [] なので初期化時にソート自体が走らない。
+    // localeCompare を使う natural ソートのコストはソート操作時にのみ発生する。
     expect(m.counters.localeCompare).toBe(0);
   });
 
