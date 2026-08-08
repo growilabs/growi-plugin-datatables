@@ -21,6 +21,7 @@ import 'datatables.net-searchpanes-bs5';
 import './DataTable.css';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 import { waitUntilReadyToInitialize } from './initScheduler';
+import { bridgeMovedTable, unbridgeMovedTable } from './reactDomBridge';
 import { setupToolbar, toolbarButtons, toolbarLanguage } from './toolbar';
 
 /**
@@ -131,7 +132,19 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
     };
 
     const applyDataTable = (tableElement: HTMLTableElement) => {
+      /*
+       * DataTables は table を自前のコンテナへ移す。
+       * React は元の親の下に table がある前提で兄弟の挿入位置を決めるので、
+       * 動かしたことを元の親に教えて辻褄を合わせる (reactDomBridge を参照)。
+       */
+      const originalParent = tableElement.parentNode;
+
       const api = new DataTable(tableElement, dataTableOptions as ConfigWeaken);
+
+      const dtContainer = api.table().container();
+      if (originalParent != null && dtContainer != null && dtContainer.parentNode === originalParent) {
+        bridgeMovedTable(originalParent, tableElement, dtContainer);
+      }
 
       setupToolbar(api);
 
@@ -205,8 +218,13 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
       const state = stateOf(container);
       if (state.api == null) return;
 
+      const originalParent = state.api.table().container()?.parentNode ?? null;
+
       state.api.destroy();
       state.api = null;
+
+      // destroy() で table は元の位置に戻るので、読み替えは不要になる
+      if (originalParent != null) unbridgeMovedTable(originalParent);
     };
 
     /*

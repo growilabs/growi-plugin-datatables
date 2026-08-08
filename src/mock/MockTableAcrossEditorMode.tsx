@@ -63,6 +63,7 @@ const DataTables = wrapDataTable(TableWithEditButton);
 const App = () => {
   const [hidden, setHidden] = useState(false);
   const [showEditButton, setShowEditButton] = useState(false);
+  const [mounted, setMounted] = useState(true);
 
   return (
     <div>
@@ -71,10 +72,12 @@ const App = () => {
       <button type="button" id="toggleEditButton" onClick={() => setShowEditButton((v) => !v)}>
         toggle edit button
       </button>
+      {/* 別ページへ遷移したときのようにツリーごと捨てる (removeChild を通る) */}
+      <button type="button" id="unmount" onClick={() => setMounted(false)}>unmount</button>
 
       {/* GROWI の PageView (d-edit-none) 相当 */}
       <div id="pageView" style={{ display: hidden ? 'none' : undefined }}>
-        <DataTables showEditButton={showEditButton} />
+        {mounted && <DataTables showEditButton={showEditButton} />}
       </div>
     </div>
   );

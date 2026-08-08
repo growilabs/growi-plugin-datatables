@@ -10,14 +10,19 @@ import { expect, test, type Page } from '@playwright/test';
  *   div.dt-container へ移しているため insertBefore が失敗していた
  *   (Node.insertBefore: Child to insert before is not a child of this node)。
  *
- *   非表示になった時点で DataTables を解除して DOM を React に返し、
- *   表示に戻ったら初期化し直すことで解消している (src/DataTable.tsx)。
+ * 対処は 2 段構え:
+ *   1. src/reactDomBridge.ts
+ *      動かした side が辻褄を合わせる。元の親の insertBefore / removeChild を読み替え、
+ *      table を指す操作を div.dt-container に向ける。表示中に条件が振れる場合も含めて塞ぐ。
+ *   2. src/DataTable.tsx の解除・再初期化
+ *      隠れている間は DataTables を解除して DOM を React に返す。
  *
  * 対象は src/mock/MockTableAcrossEditorMode.tsx (editor-mode.html から読み込まれる)。
  */
 
 const PAGE_VIEW = '#pageView';
 const WRAPPER = '.editable-with-handsontable';
+const EDIT_BUTTON = '.handsontable-modal-trigger';
 
 /** ページを開き、発生した JS エラーを集める */
 const openPage = async(page: Page): Promise<string[]> => {
@@ -137,26 +142,63 @@ test.describe('往復と表示状態', () => {
 });
 
 /*
- * 解消できていない経路の記録 (characterization)。
+ * 表示したまま編集ボタンの表示条件が変わる経路。
  *
- * 表示されたまま編集ボタンの表示条件が変わる場合は、プラグイン側では手当てできない。
- * 例えば他の利用者の編集セッションが終わって awarenessStateSize が 1 -> 0 になると、
- * showEditButton が false -> true に振れる。このとき DataTables は動作中なので
- * table は div.dt-container の中にあり、React の insertBefore が失敗する。
- * MutationObserver は React が例外を投げた後にしか発火しないので、先回りできない。
- *
- * 根本的には GROWI 側で table を div で包めば解消する
- * (.editable-with-handsontable の子が [button?, div] になり、div は動かないため)。
- *
- * このテストが「エラーが出ない」で落ちたら、GROWI 側が直ったということなので、
- * このテストごと削除してよい。
+ * 隠れている間の話ではないので解除では手当てできない。
+ * 他の利用者の編集セッションが終わって awarenessStateSize が 1 -> 0 になる場合などに、
+ * DataTables が動作したまま showEditButton が振れる。
+ * src/reactDomBridge.ts が元の親の insertBefore / removeChild を読み替えて成立させている。
  */
-test.describe('未解消の経路', () => {
-  test('表示中に編集ボタンの表示条件が変わるとエラーになる', async({ page }) => {
+test.describe('表示中の編集ボタンの出し入れ', () => {
+  test('DataTables が動作中でもエラーにならず、ボタンが出る', async({ page }) => {
     const errors = await openPage(page);
 
     await page.locator('#toggleEditButton').click();
 
-    expect((await settledErrors(page, errors)).join('\n')).toContain('insertBefore');
+    await expect(page.locator(EDIT_BUTTON)).toHaveCount(1);
+    await expect(page.locator(`${PAGE_VIEW} .dt-container`)).toHaveCount(1);
+    expect(await settledErrors(page, errors)).toEqual([]);
+  });
+
+  test('出し入れを繰り返してもエラーにならない', async({ page }) => {
+    const errors = await openPage(page);
+
+    for (let i = 0; i < 3; i++) {
+      await page.locator('#toggleEditButton').click();
+      await expect(page.locator(EDIT_BUTTON)).toHaveCount(1);
+
+      await page.locator('#toggleEditButton').click();
+      await expect(page.locator(EDIT_BUTTON)).toHaveCount(0);
+    }
+
+    // テーブルは壊れていない
+    await expect(page.locator(`${PAGE_VIEW} .dt-container`)).toHaveCount(1);
+    await expect(page.locator(`${WRAPPER} tbody tr`)).toHaveCount(8);
+    expect(await settledErrors(page, errors)).toEqual([]);
+  });
+
+  /*
+   * 別ページへ遷移したときのように、React がツリーごと捨てる経路。
+   * removeChild(table) が呼ばれるが、実際に親の下にあるのは div.dt-container なので、
+   * 読み替えていないとここでも例外になる。
+   */
+  test('ツリーごと捨てられてもエラーにならない', async({ page }) => {
+    const errors = await openPage(page);
+
+    await page.locator('#toggleEditButton').click();
+    await page.locator('#unmount').click();
+
+    await expect(page.locator(`${PAGE_VIEW} .dt-container`)).toHaveCount(0);
+    await expect(page.locator(`${PAGE_VIEW} table`)).toHaveCount(0);
+    expect(await settledErrors(page, errors)).toEqual([]);
+  });
+
+  test('編集ボタンを出しても DataTables のツールバーは残る', async({ page }) => {
+    await openPage(page);
+
+    await page.locator('#toggleEditButton').click();
+
+    await expect(page.locator(`${PAGE_VIEW} .gpdt-toolbar .gpdt-button`)).toHaveCount(4);
+    await expect(page.locator(`${WRAPPER} tbody tr`)).toHaveCount(8);
   });
 });
