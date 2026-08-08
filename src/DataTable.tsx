@@ -29,9 +29,10 @@ import { setupToolbar, toolbarButtons, toolbarLanguage } from './toolbar';
  * (react-async は promiseFn の identity が変わると再実行する)、多重初期化を防ぐ必要がある。
  *
  * 「table 要素が DataTables 登録済みか」だけでは判定できない点に注意。
- * scrollY を有効にした DataTables は table を dt-scroll-head / dt-scroll-body に作り変え、
- * ヘッダ側に複製の table を作る。その複製はコンテナ内で最初に見つかる table でありながら
- * DataTables には未登録なので、複製を掴んで初期化し直してしまう。
+ * 初期化は waitUntilReadyToInitialize を挟んで非同期に進むので、
+ * 先行した実行がまだ new DataTable() に到達していない間に後続の実行が
+ * isDataTable のチェックを通り抜けてしまう。
+ * 待ちに入る前にコンテナを登録しておくことでこの窓を塞ぐ。
  */
 const initializedContainers = new WeakSet<Element>();
 
@@ -45,7 +46,6 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
      * - 全カラムに "natural" ソートを有効化
      * - 全カラムのソート順序を "初期順序"(デフォルト) => "昇順" => "降順" に設定
      * - ページネーションを無効化
-     * - テーブルを縦スクロール化(縦幅は 500px)
      * - 拡張機能のボタンをアイコンとして表示(ボタンは以下)
      *   - "Search" ボタン: 検索欄をその場に開閉 (詳細は toolbar.ts)
      *   - "Columns" ボタン: カラムの表示・非表示をトグル
@@ -69,8 +69,22 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
        */
       order: [],
       paging: false,
-      scrollCollapse: true,
-      scrollY: '500px',
+      /*
+       * 縦スクロールはしない (かつて scrollY: '500px' + scrollCollapse: true を入れていた)。
+       *
+       * 記事中のテーブルは前後の文章と一緒に読まれるので、テーブルだけが独立した
+       * スクロール領域になっていると読む流れが切れる。
+       * 長い表はページ側のスクロールでそのまま読めばよい。
+       *
+       * 副次的に、scrollY が要求していた DOM の作り変え
+       * (table を dt-scroll-head / dt-scroll-body に分割し、ヘッダ用の table を複製する)
+       * が不要になる。ただし初期化が速くなるとは限らない。実測では 1 テーブルあたりの
+       * 初期化時間はむしろ増える場合があった (200行 x 10列で 778ms -> 855ms)。
+       * 速度目的で外したのではない。
+       *
+       * なお表の高さが頭打ちにならなくなるぶん画面内に入るテーブル数は減るので、
+       * 遅延初期化との兼ね合いでページ全体の初期表示はむしろ軽くなりやすい。
+       */
       /*
        * 行の選択はしない。
        *

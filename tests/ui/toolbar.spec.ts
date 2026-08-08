@@ -23,11 +23,11 @@ const ROWS = 50;
  * 本体テーブルの行。
  *
  * SearchPanes のパネルもコンテナ内に置かれる DataTables なので、
- * 単に .dt-scroll-body を引くとパネル側の行まで数えてしまう。
+ * 単に tbody tr を引くとパネル側の行まで数えてしまう。
  * 直系の子だけを辿って本体に限定する。
  */
 const mainRows = (container: Locator): Locator => (
-  container.locator(':scope > .mb-3 > .dt-scroll > .dt-scroll-body tbody tr')
+  container.locator(':scope > .mb-3 > table > tbody > tr')
 );
 
 /**
@@ -170,6 +170,45 @@ test.describe('ツールバー', () => {
     // ツールバー自体が常時表示なので、ホバーが外れても消えようがない
     await page.mouse.move(10, 10);
     await expect(collection).toBeVisible();
+  });
+});
+
+/*
+ * 記事中のテーブルは前後の文章と一緒に読まれるので、テーブルだけが独立した
+ * スクロール領域になっていると読む流れが切れる。長い表はページ側のスクロールで読む。
+ * かつて scrollY: '500px' + scrollCollapse: true が入っていた。
+ */
+test.describe('縦スクロール', () => {
+  test('テーブルが独立したスクロール領域にならない', async({ page }) => {
+    const container = await openTable(page);
+
+    // scrollY 有効時に作られる入れ物が一切ない
+    await expect(container.locator('.dt-scroll')).toHaveCount(0);
+    await expect(container.locator('.dt-scroll-body')).toHaveCount(0);
+
+    // コンテナ内にスクロールする要素が無い
+    expect(await container.evaluate((el) => Array.from(el.querySelectorAll('*'))
+      .filter((child) => {
+        const overflowY = getComputedStyle(child).overflowY;
+        return (overflowY === 'auto' || overflowY === 'scroll')
+          && child.scrollHeight > child.clientHeight + 1;
+      })
+      .length)).toBe(0);
+
+    // 50 行が畳まれずに出ている (500px で頭打ちにならない)
+    const table = (await container.locator(':scope > .mb-3 > table').boundingBox())!;
+    expect(table.height).toBeGreaterThan(500);
+  });
+
+  test('ヘッダの複製テーブルが作られない', async({ page }) => {
+    const container = await openTable(page);
+
+    /*
+     * scrollY 有効時はヘッダ用に table が複製され、コンテナ内で最初に見つかる table が
+     * DataTables 未登録の複製になる、という厄介な状態だった (DataTable.tsx の WeakSet の由来)。
+     */
+    await expect(container.locator(':scope > .mb-3 > table')).toHaveCount(1);
+    expect(await container.evaluate((el) => el.querySelectorAll('thead').length)).toBe(1);
   });
 });
 

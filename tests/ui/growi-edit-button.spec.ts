@@ -23,7 +23,7 @@ const EDIT_BUTTON = '.handsontable-modal-trigger';
 const openPage = async(page: Page): Promise<void> => {
   await page.setViewportSize({ width: 1000, height: 800 });
   await page.goto('/growi.html');
-  await expect(page.locator(`${WRAPPER} .dt-scroll-body tbody tr`).first()).toBeVisible();
+  await expect(page.locator(`${WRAPPER} .dt-container > .mb-3 > table > tbody > tr`).first()).toBeVisible();
 };
 
 /**

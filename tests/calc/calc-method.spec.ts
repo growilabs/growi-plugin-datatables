@@ -17,7 +17,7 @@ test.describe('計算記法', () => {
     await page.waitForSelector(`${CALC_TABLE} table.dataTable tbody tr`);
 
     const grid = await page.evaluate((selector) => {
-      const rows = document.querySelectorAll(`${selector} .dt-scroll-body tbody tr`);
+      const rows = document.querySelectorAll(`${selector} .dt-container > .mb-3 > table > tbody > tr`);
       return [...rows].map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent?.trim() ?? ''));
     }, CALC_TABLE);
 
@@ -42,7 +42,7 @@ test.describe('計算記法', () => {
     await page.waitForSelector('#MockTableForCalcErr table.dataTable tbody tr');
 
     const grid = await page.evaluate(() => {
-      const rows = document.querySelectorAll('#MockTableForCalcErr .dt-scroll-body tbody tr');
+      const rows = document.querySelectorAll('#MockTableForCalcErr .dt-container > .mb-3 > table > tbody > tr');
       return [...rows].map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent?.trim() ?? ''));
     });
 

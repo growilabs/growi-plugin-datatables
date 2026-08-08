@@ -8,7 +8,6 @@ DataTable is extended by following features.
   - You can change the order by clicking the sort button on the right side of the column header
 - Numerical values are in natural order
   - ex. "2.4m", "4.5m", "10.9m", ... (Ascending)
-- Scrolling vertically (Max table height: 500px)
 - Toolbar
 
   Controls are collapsed into a compact icon row above the table, so a table that is only being
