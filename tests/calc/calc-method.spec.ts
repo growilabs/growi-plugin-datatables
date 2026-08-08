@@ -33,4 +33,29 @@ test.describe('計算記法', () => {
       ['56', '11', '20', '2', '4,12,19,1,17,6', '12.5', ''],
     ]);
   });
+
+  test('集計対象に数値が無い場合', async({ page }) => {
+    await page.goto('/index.html');
+
+    // 遅延初期化しているので、対象を画面内に入れてから DataTables の初期化を待つ
+    await page.locator('#MockTableForCalcErr').scrollIntoViewIfNeeded();
+    await page.waitForSelector('#MockTableForCalcErr table.dataTable tbody tr');
+
+    const grid = await page.evaluate(() => {
+      const rows = document.querySelectorAll('#MockTableForCalcErr .dt-scroll-body tbody tr');
+      return [...rows].map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent?.trim() ?? ''));
+    });
+
+    /*
+     * mathjs では sum 以外がここで例外を投げ、その例外が rehype プラグインを抜けて
+     * ページ全体の描画を壊していた。自前実装では undefined を返し、
+     * CalcTable 既存の経路で '!CalcErr!' として表示される。
+     * sum だけは mathjs と同じく 0 を返す。
+     */
+    expect(grid).toEqual([
+      ['foo', 'bar', '!CalcErr!'],
+      ['baz', 'qux', ''],
+      ['0', '!CalcErr!', ''],
+    ]);
+  });
 });
