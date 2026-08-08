@@ -131,6 +131,14 @@ export const measureSortClick = async (page: Page): Promise<{
   }, before);
 };
 
+/** 表示されている 1 列目の値を先頭から数件読む (ソート順の確認用) */
+export const readFirstColumn = async (page: Page, limit = 5): Promise<string[]> => {
+  return page.evaluate((n) => {
+    const cells = document.querySelectorAll('.dt-scroll-body tbody tr td:first-child');
+    return [...cells].slice(0, n).map((td) => td.textContent?.trim() ?? '');
+  }, limit);
+};
+
 /** コンソール出力用に固定幅のテーブルを組む */
 export const formatTable = (rows: Array<Record<string, string | number>>): string => {
   if (rows.length === 0) return '(no rows)';

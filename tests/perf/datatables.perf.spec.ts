@@ -3,7 +3,9 @@ import { dirname, resolve } from 'node:path';
 
 import { expect, test } from '@playwright/test';
 
-import { formatTable, measure, measureSortClick, type BenchMetrics } from './measure';
+import {
+  formatTable, measure, measureSortClick, readFirstColumn, type BenchMetrics,
+} from './measure';
 
 /*
  * DataTable の描画性能の計測。
@@ -174,21 +176,36 @@ test.describe('描画性能', () => {
   });
 });
 
+test.describe('ソート順序の巡回', () => {
+  test('初期順序 => 昇順 => 降順 => 初期順序 と巡回する', async({ page }) => {
+    await measure(page, { tables: 1, rows: 50, cols: 3 });
+
+    // bench は行を [11..50, 1..10] の順で出力するので、読み込み順の先頭は a11
+    const initial = await readFirstColumn(page);
+    expect(initial, '初期表示は読み込み順').toEqual(['a11', 'a12', 'a13', 'a14', 'a15']);
+
+    await measureSortClick(page);
+    expect(await readFirstColumn(page), '1回目のクリックで昇順').toEqual(['a1', 'a2', 'a3', 'a4', 'a5']);
+
+    await measureSortClick(page);
+    expect(await readFirstColumn(page), '2回目のクリックで降順').toEqual(['a50', 'a49', 'a48', 'a47', 'a46']);
+
+    // 3回目は orderSequence 上 'pre' に遷移する。
+    // DataTable.tsx の order.dt ハンドラがこれを捕まえて読み込み順に戻す。
+    await measureSortClick(page);
+    expect(await readFirstColumn(page), '3回目のクリックで読み込み順に戻る').toEqual(initial);
+  });
+});
+
 test.describe('現状の挙動の固定 (characterization)', () => {
-  test('初期化1回につき draw が2回走る', async({ page }) => {
+  test('初期化1回につき draw は1回だけ', async({ page }) => {
     const m = await measure(page, { tables: 1, rows: 50 });
 
-    // 内訳:
-    //   1. new DataTable() の初期 draw
-    //      (このとき order: [[0,'pre']] による「意図しないソート」も走る)
-    //   2. DataTable.tsx 末尾の明示的な neutral().draw() で 1 を打ち消す
-    //
-    // DataTable.tsx の order.dt ハンドラは初期化時には発火しない。
-    // new DataTable() の中で初期ソートが同期的に終わったあとに api.on('order.dt') を
-    // 繋いでいるため、初回の order イベントには間に合っていない。
-    //
-    // order: [] にすれば 1 と 2 の両方が不要になり、draw は 1 回で済むはず。
-    expect(m.counters.draw).toBe(2);
+    // order: [] にしたことで、
+    //   - 初期化時の「意図しない降順ソート」
+    //   - それを打ち消す neutral().draw()
+    // の両方が不要になり、new DataTable() の初期 draw 1回だけになった。
+    expect(m.counters.draw).toBe(1);
   });
 
   test('初期表示では natural ソートの比較関数が呼ばれない', async({ page }) => {

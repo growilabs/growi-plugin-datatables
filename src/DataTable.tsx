@@ -38,7 +38,15 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
     const dataTableOptions = {
       dom: '<"mb-3"<"container-fluid"<"d-flex justify-content-between"fB>>>t<"text-muted"i>lp>',
       columnDefs: [{ type: 'natural', orderSequence: ['asc', 'desc', 'pre'], searchPanes: { show: true }, targets: '_all' }],
-      order: [[0, 'pre']],
+      /*
+       * 初期ソートはしない。
+       * かつて order: [[0, 'pre']] を指定していたが、'pre' は DataTables にとって不正な方向指定で、
+       * extSort['natural-pre'] が引けずに汎用比較の降順へフォールバックしていた。
+       * その結果「初期化時に意図しない降順ソートが走り、直後に neutral().draw() で打ち消す」
+       * という無駄な往復が発生していた (これが issue#9 の原因)。
+       * order: [] なら _fnSort が読み込み順をそのまま使うため、打ち消しの再描画も不要になる。
+       */
+      order: [],
       paging: false,
       scrollCollapse: true,
       scrollY: '500px',
@@ -54,6 +62,11 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
 
       const api = new DataTable(dtSelector, dataTableOptions as ConfigWeaken);
 
+      /*
+       * ソート順序を "初期順序" => "昇順" => "降順" => ... と巡回させるための処理。
+       * orderSequence の 'pre' は DataTables が解釈できる値ではないので、
+       * ヘッダクリックで 'pre' に遷移してきたところを捕まえて読み込み順に戻している。
+       */
       api.on('order.dt', () => {
         const order = api.order();
         if (order.length <= 0) return;
@@ -63,9 +76,6 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
 
         (api.order as any).neutral().draw();
       });
-
-      // どこかでソート順序が変わるので明示的に元の順序を設定する(issue#9)
-      (api.order as any).neutral().draw();
     };
 
     return (
