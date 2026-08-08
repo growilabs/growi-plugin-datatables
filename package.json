@@ -22,7 +22,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "yarn eslint --quiet \"src/**/*.{ts,tsx}\"",
-    "lint:format": "yarn lint --fix"
+    "lint:format": "yarn lint --fix",
+    "test:perf": "playwright test",
+    "test:perf:report": "playwright show-report"
   },
   "dependencies": {
     "datatables.net-bs5": "^2.0.3",
@@ -40,6 +42,8 @@
   "devDependencies": {
     "@babel/core": "^7.23.7",
     "@babel/eslint-parser": "^7.23.3",
+    "@playwright/test": "1.58.2",
+    "@types/node": "^20",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/uuid": "^9.0.7",

@@ -21,3 +21,13 @@ DataTable is extended by following features.
 ![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/5491e0af-0150-4189-947e-e3c2acf85293)
 
 ![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/7e6512b0-9fcd-4c08-94fb-072d35a2f492)
+
+### Performance measurement
+
+Rendering performance is measured with Playwright. See [tests/README.md](tests/README.md) for
+prerequisites (Node.js >= 20.6, and a Playwright version constraint imposed by the devcontainer's
+Debian 11 base image).
+
+```bash
+yarn test:perf
+```
