@@ -35,9 +35,7 @@
     "mathjs": "^12.3.0",
     "react": "^18.2.0",
     "react-async": "^10.0.1",
-    "react-dom": "^18.2.0",
-    "react-innertext": "^1.1.5",
-    "uuid": "^9.0.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
@@ -46,12 +44,10 @@
     "@types/node": "^20",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
-    "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vitejs/plugin-react": "^2.1.0",
     "eslint": "^8.18.0",
-    "eslint-config-next": "^12.1.6",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-weseek": "^2.1.0",
     "eslint-import-resolver-typescript": "^3.2.5",
