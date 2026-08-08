@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>growi-plugin-datatables - GROWI table with edit button</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      /*
+       * GROWI 本体の
+       * apps/app/src/client/components/ReactMarkdownComponents/TableWithEditButton.module.scss
+       * を写したもの。
+       *
+       * 重要なのは「編集ボタンに z-index が無い」こと。
+       * これが DataTables のコンテナ (position: relative) に覆われる原因なので、
+       * ここに z-index を足してしまうと再現しなくなる。本体を追うとき以外は触らないこと。
+       */
+      .editable-with-handsontable {
+        position: relative;
+      }
+
+      .editable-with-handsontable .handsontable-modal-trigger {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        padding: 0;
+        font-size: 16px;
+        line-height: 1;
+        vertical-align: bottom;
+        background-color: transparent;
+        border: none;
+        opacity: 0;
+      }
+
+      .editable-with-handsontable:hover .handsontable-modal-trigger {
+        opacity: 1;
+      }
+
+      /*
+       * 本物はアイコンフォント (material symbols) の 1 グリフで 16px 角になる。
+       * CDN のフォントに依存すると読み込み失敗で当たり判定の大きさが変わってしまうので、
+       * 同じ寸法の箱で代用する。当たり判定を測るテストなので寸法だけが重要。
+       */
+      .material-symbols-outlined {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background: currentColor;
+      }
+
+      body {
+        padding: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="MockTableWithEditButton"></div>
+    <script type="module" src="/src/mock/MockTableWithEditButton.tsx"></script>
+  </body>
+</html>

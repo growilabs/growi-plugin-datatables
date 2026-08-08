@@ -4,6 +4,27 @@
 @import 'datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.css';
 
 /*
+ * GROWI の「テーブルを編集」アイコンを DataTables のコンテナより前面に出す。
+ *
+ * GROWI (TableWithEditButton.tsx) はこのボタンを table より "前" に置き、
+ * position: absolute だけで z-index を指定していない。
+ * 一方 DataTables は table を position: relative の div.dt-container に入れ替えるため、
+ * 親 (.editable-with-handsontable) の中はこうなる:
+ *
+ *   div.editable-with-handsontable      position: relative, z-index: auto
+ *   ├─ button.handsontable-modal-trigger  position: absolute, z-index: auto  ← 先
+ *   └─ div.dt-container                   position: relative, z-index: auto  ← 後
+ *
+ * 親は z-index: auto なので重ね合わせコンテキストを作らず、両者は同じコンテキストの
+ * z-index: auto 同士になる。この場合の描画順は DOM 順なので、後にある .dt-container が
+ * ボタンを覆い、クリックが一切届かなくなる (プラグイン導入前から発生していた)。
+ * z-index を与えて描画段階を一つ上げ、コンテナより確実に前へ出す。
+ */
+.editable-with-handsontable .handsontable-modal-trigger {
+  z-index: 1;
+}
+
+/*
  * ツールバー。
  *
  * 常時見えるのはアイコン行だけで、検索欄はアイコンをクリックしたときに
@@ -17,9 +38,12 @@
   margin-bottom: 0.25rem;
 
   /*
-   * GROWI はテーブルにマウスを乗せると右上に編集アイコンを重ねて出す。
-   * ツールバーの右端をそのぶん空けておかないと、一番右のアイコンが隠れて押せなくなる。
-   * GROWI 側のアイコンサイズが変わったらこの変数だけ調整すればよい。
+   * GROWI がテーブル右上に重ねる編集アイコンのぶんだけ右端を空ける。
+   *
+   * これは見た目の余白ではなく、当たり判定のための隙間である。
+   * 上のルールで編集アイコンを最前面に上げているので、重なった領域のクリックは
+   * 必ず編集アイコンに吸われる。アイコンは右端から 10〜26px を占めるため、
+   * ここを詰めるとツールバーの右端のアイコンが押せなくなる。0 にしてはいけない。
    */
   padding-inline-end: var(--gpdt-toolbar-offset-end, 2rem);
 }
