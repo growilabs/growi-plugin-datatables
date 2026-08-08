@@ -2,7 +2,7 @@ import { Element, Parent } from 'hast';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
 
-import { type CalcResult, type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
+import { type MethodType, MethodTypes, CalcMethod } from './CalcMethod';
 
 function extractBody(table: Element): TableData {
   const tableData: TableData = [];
@@ -39,17 +39,35 @@ function getReplaceCellPositions(data: TableData): Array<{ row: number; column: 
 function handleCalcMethod(
     data: TableData,
     calcData: Array<{ row: number; column: number; methodType: MethodType }>,
-): Array<{ row: number; column: number; calcResult: CalcResult }> {
-  const calculatedData: Array<{ row: number; column: number; calcResult: CalcResult }> = [];
+): Array<{ row: number; column: number; calcResult?: number }> {
+  const calculatedData: Array<{ row: number; column: number; calcResult?: number }> = [];
   calcData.forEach(({ row, column, methodType }) => {
-    const calcResult = CalcMethod[methodType](data, { row, column });
+    let calcResult;
+
+    try {
+      calcResult = CalcMethod[methodType](data, { row, column });
+    }
+    catch (err) {
+      /*
+       * mathjs は集計対象が空だと例外を投げる (sum を除く)。
+       * 例えば数値を1つも含まない列に {vavg} を置いた場合がこれにあたる。
+       *
+       * ここで握らないと、例外は rehype プラグインの visit をそのまま抜けていく。
+       * GROWI では markdown 本文全体が1つの ReactMarkdown なので、
+       * 本文が丸ごと描画されなくなる。
+       *
+       * undefined にしておけば replaceCalculatedData が '!CalcErr!' を表示する。
+       */
+      calcResult = undefined;
+    }
+
     calculatedData.push({ row, column, calcResult });
   });
 
   return calculatedData;
 }
 
-function replaceCalculatedData(table: Element, calculatedData: Array<{ row: number; column: number; calcResult: CalcResult }>) {
+function replaceCalculatedData(table: Element, calculatedData: Array<{ row: number; column: number; calcResult?: number }>) {
   let row = 0;
   let col = 0;
 

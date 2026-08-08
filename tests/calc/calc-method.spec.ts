@@ -47,10 +47,11 @@ test.describe('計算記法', () => {
     });
 
     /*
-     * mathjs では sum 以外がここで例外を投げ、その例外が rehype プラグインを抜けて
-     * ページ全体の描画を壊していた。自前実装では undefined を返し、
-     * CalcTable 既存の経路で '!CalcErr!' として表示される。
-     * sum だけは mathjs と同じく 0 を返す。
+     * mathjs は集計対象が空だと sum 以外が例外を投げる。
+     * この例外を CalcTable が握らないと rehype プラグインを抜けてしまい、
+     * GROWI では markdown 本文が丸ごと描画されなくなる。
+     * 握った結果は CalcTable 既存の経路で '!CalcErr!' として表示される。
+     * sum だけは mathjs が 0 を返すのでそのまま 0 になる。
      */
     expect(grid).toEqual([
       ['foo', 'bar', '!CalcErr!'],
