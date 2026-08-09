@@ -21,6 +21,7 @@ import 'datatables.net-searchpanes-bs5';
 import './DataTable.css';
 import type { ConfigWeaken, OrderExtend } from './DataTableCustom';
 import { waitUntilReadyToInitialize } from './initScheduler';
+import { keepPopoversInViewport } from './popoverFit';
 import { bridgeMovedTable, unbridgeMovedTable } from './reactDomBridge';
 import { setupToolbar, toolbarButtons, toolbarLanguage } from './toolbar';
 
@@ -281,6 +282,7 @@ export const wrapDataTable = (Table: FunctionComponent<any>): FunctionComponent<
             if (containerStates.has(el)) return;
             stateOf(el);
             observeVisibility(el);
+            keepPopoversInViewport(el);
           }}
           className="position-relative"
         >
