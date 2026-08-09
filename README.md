@@ -27,9 +27,9 @@ DataTable is extended by following features.
 
 ### After filtering by "carnivore" and sorting by "Name"
 
-![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/5491e0af-0150-4189-947e-e3c2acf85293)
+<img width="1597" height="779" alt="Image" src="https://github.com/user-attachments/assets/67d00bb6-38ec-496e-848e-58af0f383632" />
 
-![image](https://github.com/weseek/growi-plugin-datatables/assets/32702772/7e6512b0-9fcd-4c08-94fb-072d35a2f492)
+<img width="999" height="560" alt="Image" src="https://github.com/user-attachments/assets/7443a0c6-80ac-41d7-b80d-a474dcda6cb9" />
 
 ### Performance measurement
 
