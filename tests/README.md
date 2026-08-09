@@ -1,6 +1,30 @@
 # tests
 
-Playwright によるブラウザ計測。現状は `perf/` の描画性能計測のみ。
+Playwright によるブラウザ計測とテスト。
+
+| ディレクトリ | 内容 |
+| --- | --- |
+| `perf/` | 描画性能の計測と、挙動の固定 (characterization) |
+| `calc/` | 独自の計算記法 (`{vsum}` など) の回帰テスト |
+| `ui/` | ツールバーの出し分け、GROWI の編集アイコンとの共存、編集モード往復、ポップオーバーの収まりの回帰テスト |
+
+`yarn test:perf` は testDir (`tests/`) 配下を全て走らせる。
+`perf/` 以外も含まれるので、名前に反して「Playwright のテスト全部」だと思ってよい。
+
+## モックページ
+
+| ページ | 何を再現しているか |
+| --- | --- |
+| `index.html` | 素の `<table>` を包んだ状態。計算記法とツールバーの確認用 |
+| `growi.html` | GROWI の `TableWithEditButton` を包んだ状態。編集アイコンとの重なりの確認用 |
+| `editor-mode.html` | 上記に加えて編集モードの往復 (非表示 → 再表示) を再現。DOM の解除と再初期化の確認用 |
+| `narrow-column.html` | サイドバーぶん右に寄った狭い本文段を再現。ポップオーバーの収まりの確認用 |
+| `bench.html` | 性能計測用 (`tests/README.md` 末尾を参照) |
+
+`growi.html` と `editor-mode.html` は GROWI 本体の `TableWithEditButton.tsx` / `.module.scss` を写している。
+このプラグインが実際に包む相手は素の `<table>` ではなくこのコンポーネントなので、
+両者の重なりに起因する不具合は `index.html` 側では原理的に検出できない。
+**GROWI 本体のこのコンポーネントが変わったら両方とも追随させること。**
 
 ## セットアップ
 

@@ -115,9 +115,7 @@ export const measureSortClick = async (page: Page): Promise<{
     const b = (window as any).__bench;
     b.marks.clickAt = performance.now();
 
-    // scrollY 有効時、操作対象のヘッダは .dt-scroll-head 側にある
-    const header = document.querySelector<HTMLElement>('.dt-scroll-head thead th')
-      ?? document.querySelector<HTMLElement>('thead th');
+    const header = document.querySelector<HTMLElement>('table.dataTable thead th');
     if (header == null) throw new Error('sortable header not found');
 
     const snapshot = { draw: b.counters.draw, localeCompare: b.counters.localeCompare };
@@ -169,7 +167,7 @@ export const scrollThroughPage = async (page: Page): Promise<void> => {
 /** 表示されている 1 列目の値を先頭から数件読む (ソート順の確認用) */
 export const readFirstColumn = async (page: Page, limit = 5): Promise<string[]> => {
   return page.evaluate((n) => {
-    const cells = document.querySelectorAll('.dt-scroll-body tbody tr td:first-child');
+    const cells = document.querySelectorAll('table.dataTable tbody tr td:first-child');
     return [...cells].slice(0, n).map((td) => td.textContent?.trim() ?? '');
   }, limit);
 };
