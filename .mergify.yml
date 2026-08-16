@@ -1,8 +1,37 @@
+shared:
+  required_actions_were_succeeded_or_skipped: &required_actions_were_succeeded_or_skipped
+    - or:
+        - check-success = check_artifacts_are_latest
+        - check-skipped = check_artifacts_are_latest
+    - or:
+        - check-skipped = lint
+        - check-success = lint
+    - or:
+        - check-skipped = build
+        - check-success = build
+    - or:
+        - check-skipped = check-title
+        - check-success = check-title
+    - or:
+        - check-skipped = labeling
+        - check-success = labeling
+
 pull_request_rules:
+  - name: All required actions were succeeded or skipped
+    conditions:
+      - and: *required_actions_were_succeeded_or_skipped
+    actions:
+      post_check:
+        title: required-actions-were-succeeded-or-skipped
+        success_conditions:
+          - and: *required_actions_were_succeeded_or_skipped
   - name: Automatic merge for Preparing next version
     conditions:
       - author = github-actions[bot]
       - label = "type/prepare-next-version"
     actions:
+      review:
+        type: APPROVE
+        message: Automatically approving github-actions[bot]
       merge:
         method: merge

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>growi-plugin-datatables - table in a narrow column</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      /*
+       * GROWI の画面配置を模したもの。
+       * 「サイドバーぶん右に寄った、幅の決まった本文段」であることが要点で、
+       * これが無いとポップオーバーのはみ出しを再現できない。
+       * .main を position: relative にしているのも実物に合わせている
+       * (DataTables のはみ出し補正が offsetParent 基準で計算するため、
+       *  どこが offsetParent になるかで結果が変わる)。
+       */
+      body {
+        margin: 0;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        background: #eee;
+      }
+
+      .main {
+        position: relative;
+        max-width: 760px;
+        margin-left: 260px;
+        padding: 24px 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar"></div>
+    <div class="main">
+      <div id="MockTableInNarrowColumn"></div>
+    </div>
+    <script type="module" src="/src/mock/MockTableInNarrowColumn.tsx"></script>
+  </body>
+</html>
